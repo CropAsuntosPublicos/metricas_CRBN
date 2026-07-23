@@ -467,8 +467,8 @@
         </div>
         <div id="liKpiImpDelta" style="margin-top:10px"></div>
       </div>
-      <div class="kpi-card"><div class="kpi-eyebrow">Clics</div><span class="kpi-num azul" id="liKpiCli">—</span><div class="kpi-desc" id="liKpiCliSub">—</div></div>
-      <div class="kpi-card"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="liKpiRea">—</span><div class="kpi-desc" id="liKpiReaSub">—</div></div>
+      <div class="kpi-card" id="liKpiCardCli"><div class="kpi-eyebrow">Clics</div><span class="kpi-num azul" id="liKpiCli">—</span><div class="kpi-desc" id="liKpiCliSub">—</div></div>
+      <div class="kpi-card" id="liKpiCardRea"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="liKpiRea">—</span><div class="kpi-desc" id="liKpiReaSub">—</div></div>
       <div class="kpi-card"><div class="kpi-eyebrow">Comentarios</div><span class="kpi-num" id="liKpiCom">—</span><div class="kpi-desc">interacciones</div></div>
       <div class="kpi-card"><div class="kpi-eyebrow">Tasa interacción</div><span class="kpi-num verde" id="liKpiTasa">—</span><div class="kpi-desc">promedio orgánico</div></div>
     </div>
@@ -564,8 +564,8 @@
         </div>
         <div id="fbKpiAlcDelta" style="margin-top:10px"></div>
       </div>
-      <div class="kpi-card"><div class="kpi-eyebrow">Visualizaciones</div><span class="kpi-num azul" id="fbKpiViz">—</span><div class="kpi-desc" id="fbKpiVizSub">—</div></div>
-      <div class="kpi-card"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="fbKpiRea">—</span><div class="kpi-desc" id="fbKpiReaSub">—</div></div>
+      <div class="kpi-card" id="fbKpiCardViz"><div class="kpi-eyebrow">Visualizaciones</div><span class="kpi-num azul" id="fbKpiViz">—</span><div class="kpi-desc" id="fbKpiVizSub">—</div></div>
+      <div class="kpi-card" id="fbKpiCardRea"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="fbKpiRea">—</span><div class="kpi-desc" id="fbKpiReaSub">—</div></div>
       <div class="kpi-card"><div class="kpi-eyebrow">Comentarios</div><span class="kpi-num" id="fbKpiCom">—</span><div class="kpi-desc">interacciones</div></div>
       <div class="kpi-card"><div class="kpi-eyebrow">Compartidos</div><span class="kpi-num verde" id="fbKpiSha">—</span><div class="kpi-desc">veces compartido</div></div>
     </div>
@@ -789,6 +789,30 @@ function renderLIChart(){
       }
     }
   });
+
+  // Highlight the KPI card that matches the selected metric
+  // imp → principal card (already dark, no action needed); cli → Clics; rea → Reacciones
+  const liKpiMap={ imp:null, cli:'liKpiCardCli', rea:'liKpiCardRea' };
+  ['liKpiCardCli','liKpiCardRea'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.style.background='';
+    el.style.borderColor='';
+    el.style.boxShadow='';
+    const num=el.querySelector('.kpi-num');
+    if(num){ num.style.color=''; }
+  });
+  const liActiveId=liKpiMap[metrica];
+  if(liActiveId){
+    const el=document.getElementById(liActiveId);
+    if(el){
+      el.style.background='rgba(28,52,92,0.07)';
+      el.style.borderColor='rgba(28,52,92,0.35)';
+      el.style.boxShadow='0 0 0 2px rgba(28,52,92,0.12)';
+      const num=el.querySelector('.kpi-num');
+      if(num){ num.style.color='var(--azul)'; }
+    }
+  }
 }
 
 function renderLIComparativa(){
@@ -861,7 +885,7 @@ function renderFB(){
   renderFBChartTipo(d.posts);
   renderFBChartTop(d.posts);
   renderFBComparativa();
-  renderFBTabla(d.posts);
+  // renderFBTabla is called inside renderFBChart with the current metric
 }
 
 function renderFBChart(){
@@ -874,7 +898,10 @@ function renderFBChart(){
     return fechaA-fechaB;
   });
   const labels  = sorted.map(p=>p.fecha);
-  const valores = sorted.map(p=>p[metrica]);
+  // Map selector value to correct post field (imp selector → viz field in FB data)
+  const campoMap={alc:'alc',imp:'viz',rea:'rea'};
+  const campo=campoMap[metrica]||metrica;
+  const valores = sorted.map(p=>p[campo]);
   const metLabels={alc:'Alcance',imp:'Visualizaciones',rea:'Reacciones'};
   document.getElementById('fbChartTitulo').textContent='Tendencia por publicación · '+metLabels[metrica];
 
@@ -902,6 +929,32 @@ function renderFBChart(){
       }
     }
   });
+  // Re-render table so the highlighted column matches the selected metric
+  renderFBTabla(posts, metrica);
+
+  // Highlight the KPI card that matches the selected metric
+  const kpiMap={ alc: null, imp: 'fbKpiCardViz', rea: 'fbKpiCardRea' };
+  ['fbKpiCardViz','fbKpiCardRea'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.style.background='';
+    el.style.borderColor='';
+    el.style.boxShadow='';
+    // Reset number color to original
+    const num=el.querySelector('.kpi-num');
+    if(num){ num.style.color=''; }
+  });
+  const activeId=kpiMap[metrica];
+  if(activeId){
+    const el=document.getElementById(activeId);
+    if(el){
+      el.style.background='rgba(24,119,242,0.07)';
+      el.style.borderColor='rgba(24,119,242,0.35)';
+      el.style.boxShadow='0 0 0 2px rgba(24,119,242,0.12)';
+      const num=el.querySelector('.kpi-num');
+      if(num){ num.style.color='var(--fb-color)'; }
+    }
+  }
 }
 
 function renderFBChartTipo(posts){
@@ -957,21 +1010,44 @@ function renderFBComparativa(){
   }).join('');
 }
 
-function renderFBTabla(posts){
-  const sorted=[...posts].sort((a,b)=>b.alc-a.alc);
+function renderFBTabla(posts, metrica){
+  // Default to 'alc' if called without metric (initial render)
+  const met = metrica || document.getElementById('fbMetricaSelect').value || 'alc';
+  // Sort table by the selected metric's field
+  const campoMap={alc:'alc',imp:'viz',rea:'rea'};
+  const campo = campoMap[met]||'alc';
+  const sorted=[...posts].sort((a,b)=>b[campo]-a[campo]);
+
+  // Column indices: viz=3, alc=4, rea=5 (0-based from first td)
+  const hiCol={alc:4, imp:3, rea:5};
+  const hi=hiCol[met]||4;
+
+  // Highlight style for the active column cell
+  const hiStyle='background:rgba(24,119,242,0.08);color:var(--azul);font-weight:800;';
+
   document.getElementById('fbTablaBody').innerHTML=sorted.map(p=>{
     const tipoCls=p.tipo==='Videos'?'tipo-video':'tipo-foto';
-    return `<tr>
-      <td class="fecha-cell">${p.fecha}</td>
-      <td><span class="tipo-tag ${tipoCls}">${p.tipo}</span></td>
-      <td class="titulo-cell"><a class="post-link" href="${p.enlace}" target="_blank" title="${p.titulo}">${p.titulo}</a></td>
-      <td class="num-cell">${fmt(p.viz)}</td>
-      <td class="num-cell hi">${fmt(p.alc)}</td>
-      <td class="num-cell">${fmt(p.rea)}</td>
-      <td class="num-cell">${p.com}</td>
-      <td class="num-cell">${p.sha}</td>
-    </tr>`;
+    const cells=[
+      `<td class="fecha-cell">${p.fecha}</td>`,
+      `<td><span class="tipo-tag ${tipoCls}">${p.tipo}</span></td>`,
+      `<td class="titulo-cell"><a class="post-link" href="${p.enlace}" target="_blank" title="${p.titulo}">${p.titulo}</a></td>`,
+      `<td class="num-cell" style="${hi===3?hiStyle:''}">${fmt(p.viz)}</td>`,
+      `<td class="num-cell" style="${hi===4?hiStyle:''}">${fmt(p.alc)}</td>`,
+      `<td class="num-cell" style="${hi===5?hiStyle:''}">${fmt(p.rea)}</td>`,
+      `<td class="num-cell">${p.com}</td>`,
+      `<td class="num-cell">${p.sha}</td>`,
+    ];
+    return `<tr>${cells.join('')}</tr>`;
   }).join('');
+
+  // Also highlight the table header to match
+  const headers=document.querySelectorAll('#fbTablaBody').item(0)?.closest('table')?.querySelectorAll('th');
+  if(headers){
+    headers.forEach((th,i)=>{
+      th.style.background = i===hi ? 'var(--azul-med)' : 'var(--azul)';
+      th.style.color = '#fff';
+    });
+  }
 }
 
 /* ════════════════════════════════════
