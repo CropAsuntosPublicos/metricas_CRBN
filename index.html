@@ -161,6 +161,9 @@
   /* ── MAIN CONTENT ── */
   .main-content { max-width:1200px; margin:0 auto; padding:32px 48px 80px; }
 
+  .kpi-card[onclick] { cursor:pointer; }
+  .kpi-card[onclick]:hover { border-color:#c8d0da; filter:brightness(0.97); }
+
   /* ── KPI STRIP ── */
   .kpi-strip { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:14px; margin-bottom:20px; }
   .kpi-card { background:var(--blanco); border-radius:12px; padding:22px 20px 18px; border:1px solid var(--gris-borde); }
@@ -459,7 +462,7 @@
   <main class="main-content">
     <!-- KPIs -->
     <div class="kpi-strip">
-      <div class="kpi-card principal">
+      <div class="kpi-card principal" onclick="setLIMetrica('imp')">
         <div>
           <div class="kpi-eyebrow">Impresiones totales</div>
           <span class="kpi-num" id="liKpiImp">—</span>
@@ -467,8 +470,8 @@
         </div>
         <div id="liKpiImpDelta" style="margin-top:10px"></div>
       </div>
-      <div class="kpi-card" id="liKpiCardCli"><div class="kpi-eyebrow">Clics</div><span class="kpi-num azul" id="liKpiCli">—</span><div class="kpi-desc" id="liKpiCliSub">—</div></div>
-      <div class="kpi-card" id="liKpiCardRea"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="liKpiRea">—</span><div class="kpi-desc" id="liKpiReaSub">—</div></div>
+      <div class="kpi-card" id="liKpiCardCli" onclick="setLIMetrica('cli')"><div class="kpi-eyebrow">Clics</div><span class="kpi-num azul" id="liKpiCli">—</span><div class="kpi-desc" id="liKpiCliSub">—</div></div>
+      <div class="kpi-card" id="liKpiCardRea" onclick="setLIMetrica('rea')"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="liKpiRea">—</span><div class="kpi-desc" id="liKpiReaSub">—</div></div>
       <div class="kpi-card"><div class="kpi-eyebrow">Comentarios</div><span class="kpi-num" id="liKpiCom">—</span><div class="kpi-desc">interacciones</div></div>
       <div class="kpi-card"><div class="kpi-eyebrow">Tasa interacción</div><span class="kpi-num verde" id="liKpiTasa">—</span><div class="kpi-desc">promedio orgánico</div></div>
     </div>
@@ -556,7 +559,7 @@
 
   <main class="main-content">
     <div class="kpi-strip">
-      <div class="kpi-card principal">
+      <div class="kpi-card principal" onclick="setFBMetrica('alc')">
         <div>
           <div class="kpi-eyebrow">Alcance total</div>
           <span class="kpi-num" id="fbKpiAlc">—</span>
@@ -564,8 +567,8 @@
         </div>
         <div id="fbKpiAlcDelta" style="margin-top:10px"></div>
       </div>
-      <div class="kpi-card" id="fbKpiCardViz"><div class="kpi-eyebrow">Visualizaciones</div><span class="kpi-num azul" id="fbKpiViz">—</span><div class="kpi-desc" id="fbKpiVizSub">—</div></div>
-      <div class="kpi-card" id="fbKpiCardRea"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="fbKpiRea">—</span><div class="kpi-desc" id="fbKpiReaSub">—</div></div>
+      <div class="kpi-card" id="fbKpiCardViz" onclick="setFBMetrica('imp')"><div class="kpi-eyebrow">Visualizaciones</div><span class="kpi-num azul" id="fbKpiViz">—</span><div class="kpi-desc" id="fbKpiVizSub">—</div></div>
+      <div class="kpi-card" id="fbKpiCardRea" onclick="setFBMetrica('rea')"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="fbKpiRea">—</span><div class="kpi-desc" id="fbKpiReaSub">—</div></div>
       <div class="kpi-card"><div class="kpi-eyebrow">Comentarios</div><span class="kpi-num" id="fbKpiCom">—</span><div class="kpi-desc">interacciones</div></div>
       <div class="kpi-card"><div class="kpi-eyebrow">Compartidos</div><span class="kpi-num verde" id="fbKpiSha">—</span><div class="kpi-desc">veces compartido</div></div>
     </div>
@@ -1351,6 +1354,16 @@ function toggleAcord(btn) {
   const isOpen = btn.classList.contains('open');
   btn.classList.toggle('open', !isOpen);
   body.classList.toggle('open', !isOpen);
+}
+
+function setLIMetrica(val){
+  document.getElementById('liMetricaSelect').value = val;
+  renderLIChart();
+}
+
+function setFBMetrica(val){
+  document.getElementById('fbMetricaSelect').value = val;
+  renderFBChart();
 }
 </script>
 
