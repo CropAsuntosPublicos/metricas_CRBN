@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruta Bogotá Norte · Dashboard Redes Sociales</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --azul:       #1c345c;
+    --azul-osc:   #162847;
+    --azul-med:   #2a4878;
+    --verde:      #6cb42c;
+    --verde-bg:   #eef7e5;
+    --blanco:     #ffffff;
+    --fondo:      #f2f2f2;
+    --gris-borde: #e0e0e0;
+    --gris:       #757575;
+    --gris-osc:   #444;
+    --negro:      #111;
+    --li-color:   #0a66c2;
+    --li-bg:      #e8f1fb;
+    --fb-color:   #1877f2;
+    --fb-bg:      #e7f0fd;
+    --topbar-h:   64px;
+    --tabs-h:     46px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { max-width:100vw; overflow-x:clip; }
+  body { font-family:'Inter',sans-serif; background:var(--fondo); color:var(--negro); line-height:1.5; -webkit-font-smoothing:antialiased; }
+
+  .no-scrollbar::-webkit-scrollbar { display:none; }
+  .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+  .scroll-fino::-webkit-scrollbar { width:6px; height:6px; }
+  .scroll-fino::-webkit-scrollbar-track { background:transparent; }
+  .scroll-fino::-webkit-scrollbar-thumb { background:#c8d0da; border-radius:10px; }
+  .scroll-fino { scrollbar-width:thin; scrollbar-color:#c8d0da transparent; }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    background:var(--azul);
+    padding:0 48px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    height:64px;
+    position:sticky;
+    top:0;
+    z-index:200;
+  }
+  .top-logos { display:flex; align-items:center; gap:20px; }
+  .logo-rbn { display:flex; align-items:center; gap:12px; }
+  .logo-mark {
+    width:36px; height:36px;
+    background:var(--verde);
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logo-mark svg { width:20px; height:20px; }
+  .logo-text { font-family:'Montserrat',sans-serif; font-weight:900; font-size:14px; color:#fff; letter-spacing:-0.01em; line-height:1.15; }
+  .logo-text span { display:block; font-weight:400; font-size:9px; color:rgba(255,255,255,0.45); letter-spacing:0.12em; text-transform:uppercase; margin-top:1px; }
+  .logo-sep { width:1px; height:28px; background:rgba(255,255,255,0.15); }
+  .logo-crop { font-family:'Montserrat',sans-serif; font-weight:800; font-size:12px; color:rgba(255,255,255,0.5); letter-spacing:0.08em; }
+  .logo-crop span { display:block; font-size:8px; font-weight:400; letter-spacing:0.1em; color:rgba(255,255,255,0.28); text-transform:uppercase; margin-top:2px; }
+  .periodo-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--verde); color:#fff;
+    font-size:11px; font-weight:700; letter-spacing:0.1em;
+    text-transform:uppercase; padding:5px 14px; border-radius:20px;
+    white-space:nowrap; flex-shrink:0;
+  }
+
+  /* ── MAIN TABS ── */
+  .main-tabs {
+    background:var(--azul-osc);
+    padding:0 48px;
+    display:flex; gap:0;
+    position:sticky; top:64px; z-index:190;
+    border-bottom:1px solid rgba(255,255,255,0.07);
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+  }
+  .main-tab {
+    padding:0 24px; height:46px;
+    display:flex; align-items:center; gap:8px;
+    font-family:'Inter',sans-serif;
+    font-size:12px; font-weight:600; letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,0.38);
+    background:transparent; border:none;
+    border-bottom:2px solid transparent;
+    cursor:pointer; transition:all .18s; white-space:nowrap; flex-shrink:0;
+  }
+  .main-tab svg { opacity:.45; transition:opacity .18s; }
+  .main-tab:hover { color:rgba(255,255,255,0.7); }
+  .main-tab.active { color:#fff; border-bottom-color:var(--verde); }
+  .main-tab.active svg { opacity:1; }
+
+  .module { display:none; }
+  .module.visible { display:block; }
+
+  /* ── HERO SECTION ── */
+  .hero {
+    background:linear-gradient(135deg, var(--azul) 0%, var(--azul-osc) 50%, #0c1a2e 100%);
+    padding:48px 48px 52px;
+    position:relative; overflow:hidden;
+  }
+  .hero::before {
+    content:''; position:absolute; top:-80px; right:-80px;
+    width:400px; height:400px; border-radius:50%;
+    border:70px solid rgba(108,180,44,0.1);
+  }
+  .hero::after {
+    content:''; position:absolute; bottom:-50px; left:-50px;
+    width:250px; height:250px; border-radius:50%;
+    border:40px solid rgba(255,255,255,0.04);
+  }
+  .hero-inner { position:relative; z-index:1; max-width:1200px; margin:0 auto; }
+  .hero-eyebrow { font-size:10px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--verde); margin-bottom:12px; }
+  .hero-titulo { font-family:'Montserrat',sans-serif; font-size:38px; font-weight:900; color:#fff; line-height:1.1; letter-spacing:-0.02em; margin-bottom:5px; }
+  .hero-titulo em { font-style:normal; color:var(--verde); }
+  .hero-sub { font-size:13px; color:rgba(255,255,255,0.45); margin-bottom:40px; }
+  .hero-kpis { display:flex; gap:0; flex-wrap:wrap; }
+  .hero-kpi { padding:0 28px 0 0; margin-right:28px; border-right:1px solid rgba(255,255,255,0.1); }
+  .hero-kpi:last-child { border-right:none; margin-right:0; padding-right:0; }
+  .hero-kpi-label { font-size:9px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:4px; }
+  .hero-kpi-valor { font-family:'Montserrat',sans-serif; font-weight:900; font-size:13px; color:rgba(255,255,255,0.88); }
+
+  /* ── FILTROS BAR ── */
+  .filtros-bar {
+    background:var(--blanco);
+    border-bottom:1px solid var(--gris-borde);
+    padding:0 48px;
+    display:flex; align-items:center; gap:20px;
+    height:56px;
+    position:sticky; top:110px; z-index:80;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap;
+  }
+  .filtros-label { font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--gris); flex-shrink:0; }
+  .filtros-sep { width:1px; height:20px; background:var(--gris-borde); flex-shrink:0; }
+  .filtro-select {
+    appearance:none; -webkit-appearance:none;
+    padding:5px 28px 5px 12px;
+    border-radius:20px;
+    border:1.5px solid var(--gris-borde);
+    background-color:transparent;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%236cb42c' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat; background-position:right 10px center; background-size:10px 6px;
+    font-family:'Inter',sans-serif; font-size:12px; font-weight:700;
+    color:var(--azul); cursor:pointer; transition:all .15s;
+  }
+  .filtro-select:focus { outline:none; border-color:var(--verde); }
+  .plat-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11px; font-weight:700; padding:4px 12px;
+    border-radius:20px; margin-left:auto; flex-shrink:0;
+  }
+  .plat-badge.li { background:var(--li-bg); color:var(--li-color); }
+  .plat-badge.fb { background:var(--fb-bg); color:var(--fb-color); }
+
+  /* ── MAIN CONTENT ── */
+  .main-content { max-width:1200px; margin:0 auto; padding:32px 48px 80px; }
+
+  /* ── KPI STRIP ── */
+  .kpi-strip { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:14px; margin-bottom:20px; }
+  .kpi-card { background:var(--blanco); border-radius:12px; padding:22px 20px 18px; border:1px solid var(--gris-borde); }
+  .kpi-card.principal { background:var(--azul); border-color:var(--azul); display:flex; flex-direction:column; justify-content:space-between; }
+  .kpi-eyebrow { font-size:9px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--gris); margin-bottom:8px; }
+  .kpi-card.principal .kpi-eyebrow { color:rgba(255,255,255,0.55); }
+  .kpi-num { font-family:'Montserrat',sans-serif; font-weight:900; font-size:34px; letter-spacing:-0.03em; line-height:1; color:var(--negro); display:block; margin-bottom:4px; }
+  .kpi-card.principal .kpi-num { font-size:46px; color:#fff; }
+  .kpi-desc { font-size:11px; color:var(--gris); font-weight:500; }
+  .kpi-card.principal .kpi-desc { color:rgba(255,255,255,0.55); font-size:12px; }
+  .kpi-num.verde { color:var(--verde); }
+  .kpi-num.azul  { color:var(--azul); }
+  .kpi-num.li    { color:var(--li-color); }
+  .kpi-num.fb    { color:var(--fb-color); }
+  .delta-badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-top:8px; }
+  .delta-badge.up   { background:rgba(108,180,44,0.18); color:var(--verde); }
+  .delta-badge.down { background:rgba(196,46,32,0.12); color:#c42e20; }
+  .delta-badge.same { background:rgba(100,100,100,0.1); color:var(--gris); }
+
+  /* ── CHARTS ── */
+  .charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  .chart-card { background:var(--blanco); border-radius:12px; padding:24px 24px 20px; border:1px solid var(--gris-borde); }
+  .chart-card.full { grid-column:1/-1; overflow:hidden; }
+  .chart-titulo { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--gris); margin-bottom:18px; }
+  .chart-scroll-wrap { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:8px; }
+  .chart-area { position:relative; height:240px; width:100%; }
+  .chart-area.tall { height:270px; min-width:500px; }
+  .chart-legend { display:flex; gap:16px; margin-top:12px; justify-content:center; flex-wrap:wrap; }
+  .legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--gris); font-weight:500; }
+  .legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+  /* ── COMPARATIVA ── */
+  .comp-card { background:var(--blanco); border-radius:12px; padding:24px; border:1px solid var(--gris-borde); margin-bottom:16px; }
+  .comp-titulo { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--gris); margin-bottom:18px; }
+  .comp-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+  .comp-mes { border-radius:10px; padding:18px; background:var(--fondo); border:1.5px solid transparent; }
+  .comp-mes.activo { background:rgba(28,52,92,0.06); border-color:rgba(28,52,92,0.2); }
+  .comp-mes-label { font-size:9px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--gris); margin-bottom:8px; }
+  .comp-mes-principal { font-family:'Montserrat',sans-serif; font-weight:900; font-size:28px; letter-spacing:-0.02em; color:var(--negro); margin-bottom:3px; }
+  .comp-mes-sub { font-size:11px; color:var(--gris); margin-bottom:12px; }
+  .comp-bars { display:flex; flex-direction:column; gap:8px; }
+  .comp-bar-row { display:flex; align-items:center; gap:8px; }
+  .comp-bar-label { font-size:10px; color:var(--gris); width:80px; text-align:right; font-weight:500; }
+  .comp-bar-track { flex:1; height:7px; background:#eaeaea; border-radius:4px; overflow:hidden; }
+  .comp-bar-fill { height:100%; border-radius:4px; }
+  .comp-bar-val { font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; color:var(--gris); width:46px; }
+
+  /* ── TABLA DE POSTS ── */
+  .tabla-card { background:var(--blanco); border-radius:12px; border:1px solid var(--gris-borde); overflow:hidden; margin-top:16px; }
+  .tabla-header { padding:18px 22px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--gris-borde); }
+  .tabla-titulo { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--gris); }
+  .tabla-wrap { overflow-x:auto; max-height:380px; }
+  .tabla-wrap table { width:100%; border-collapse:collapse; }
+  .tabla-wrap th { position:sticky; top:0; background:var(--fondo); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gris); padding:10px 14px; text-align:left; border-bottom:1px solid var(--gris-borde); white-space:nowrap; }
+  .tabla-wrap td { padding:10px 14px; font-size:12px; border-bottom:1px solid #f4f4f4; vertical-align:middle; }
+  .tabla-wrap tr:last-child td { border-bottom:none; }
+  .tabla-wrap tr:hover td { background:#fafafa; }
+  .fecha-cell { font-family:'Montserrat',sans-serif; font-weight:700; font-size:11px; color:var(--azul); white-space:nowrap; }
+  .tipo-tag { display:inline-flex; align-items:center; padding:2px 9px; border-radius:5px; font-size:10px; font-weight:700; white-space:nowrap; }
+  .tipo-video { background:#f0e8ff; color:#6b21a8; }
+  .tipo-foto  { background:var(--li-bg); color:var(--li-color); }
+  .tipo-org   { background:var(--verde-bg); color:#3a6418; }
+  .num-cell { font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; color:var(--gris-osc); text-align:right; white-space:nowrap; }
+  .num-cell.hi { color:var(--azul); }
+  .titulo-cell { max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--gris-osc); }
+  .post-link { color:inherit; text-decoration:none; }
+  .post-link:hover { color:var(--azul); text-decoration:underline; }
+
+  /* ── MENCIONES ── */
+  .men-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+  .men-stat-card { background:var(--blanco); border-radius:12px; padding:22px 20px; border:1px solid var(--gris-borde); }
+  .men-red-bars { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+  .men-bar-row { display:flex; align-items:center; gap:10px; }
+  .men-bar-label { font-size:11px; color:var(--gris); width:24px; font-weight:700; flex-shrink:0; }
+  .men-bar-track { flex:1; height:8px; background:#eaeaea; border-radius:4px; overflow:hidden; }
+  .men-bar-fill  { height:100%; border-radius:4px; }
+  .men-bar-count { font-family:'Montserrat',sans-serif; font-weight:700; font-size:11px; color:var(--gris); width:20px; text-align:right; }
+
+  .men-list { display:flex; flex-direction:column; gap:10px; }
+  .men-card { background:var(--blanco); border-radius:10px; padding:16px 18px; border:1px solid var(--gris-borde); border-left:4px solid var(--gris-borde); }
+  .men-card.ig { border-left-color:#e1306c; }
+  .men-card.fb { border-left-color:var(--fb-color); }
+  .men-card.x  { border-left-color:#111; }
+  .men-meta { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .men-red-badge { font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:2px 8px; border-radius:5px; }
+  .men-red-badge.ig { background:#fce7f0; color:#9b1e4a; }
+  .men-red-badge.fb { background:var(--fb-bg); color:var(--fb-color); }
+  .men-red-badge.x  { background:#eee; color:#111; }
+  .men-usuario { font-size:11px; font-weight:600; color:var(--gris-osc); }
+  .men-texto { font-size:12.5px; color:var(--gris-osc); line-height:1.55; }
+
+  /* ── RECOMENDACIONES ── */
+  .rec-hero-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(108,180,44,0.18); color:var(--verde); font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:14px; }
+  .rec-section-label { font-size:9px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--verde); margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+  .rec-section-label::after { content:''; flex:1; height:1px; background:var(--gris-borde); }
+
+  .alerta-card { background:#fff8f0; border:1.5px solid #f5a623; border-radius:12px; padding:20px 22px; display:flex; gap:14px; align-items:flex-start; margin-bottom:16px; }
+  .alerta-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
+  .alerta-titulo { font-size:12px; font-weight:700; color:#c25d00; margin-bottom:4px; }
+  .alerta-texto { font-size:12px; color:#7a4500; line-height:1.6; }
+
+  .rec-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin-bottom:16px; }
+  .rec-card { background:var(--blanco); border-radius:12px; padding:22px; border:1px solid var(--gris-borde); border-top:3px solid var(--gris-borde); }
+  .rec-card.alta  { border-top-color:#c42e20; }
+  .rec-card.media { border-top-color:#f5a623; }
+  .rec-card.estrat{ border-top-color:var(--azul); }
+  .rec-card-eyebrow { font-size:9px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:8px; }
+  .rec-card.alta   .rec-card-eyebrow { color:#c42e20; }
+  .rec-card.media  .rec-card-eyebrow { color:#c27a00; }
+  .rec-card.estrat .rec-card-eyebrow { color:var(--azul); }
+  .rec-card-titulo { font-size:14px; font-weight:700; color:var(--negro); margin-bottom:8px; line-height:1.35; }
+  .rec-card-texto { font-size:12px; color:var(--gris); line-height:1.65; }
+  .rec-card-red { display:inline-flex; align-items:center; gap:5px; margin-top:12px; font-size:10px; font-weight:700; padding:3px 10px; border-radius:5px; }
+  .rec-card-red.li  { background:var(--li-bg); color:var(--li-color); }
+  .rec-card-red.fb  { background:var(--fb-bg); color:var(--fb-color); }
+  .rec-card-red.ig  { background:#fce7f0; color:#9b1e4a; }
+  .rec-card-red.all { background:var(--verde-bg); color:#3a6418; }
+
+  .horarios-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
+  .horario-card { background:var(--blanco); border-radius:10px; padding:18px; border:1px solid var(--gris-borde); }
+  .horario-red { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .horario-red-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .horario-red-label { font-size:11px; font-weight:700; color:var(--negro); }
+  .horario-slot { display:flex; align-items:flex-start; gap:8px; margin-bottom:7px; }
+  .horario-hora { font-family:'Montserrat',sans-serif; font-weight:700; font-size:11px; color:var(--azul); min-width:110px; }
+  .horario-obj { font-size:11px; color:var(--gris); line-height:1.4; }
+
+  .ideas-list { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+  .idea-card { background:var(--blanco); border-radius:10px; padding:18px 20px; border:1px solid var(--gris-borde); display:flex; gap:16px; align-items:flex-start; }
+  .idea-num { font-family:'Montserrat',sans-serif; font-weight:900; font-size:22px; color:var(--gris-borde); flex-shrink:0; line-height:1; margin-top:2px; }
+  .idea-titulo { font-size:13px; font-weight:700; color:var(--negro); margin-bottom:4px; }
+  .idea-texto { font-size:12px; color:var(--gris); line-height:1.6; }
+  .idea-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+  .idea-tag { font-size:10px; font-weight:600; padding:2px 8px; border-radius:4px; background:var(--fondo); color:var(--gris); }
+
+  .kpi-rec-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:16px; }
+  .kpi-rec-card { background:var(--blanco); border-radius:10px; padding:16px 18px; border:1px solid var(--gris-borde); }
+  .kpi-rec-nombre { font-size:12px; font-weight:700; color:var(--negro); margin-bottom:3px; }
+  .kpi-rec-obj { font-size:11px; color:var(--gris); line-height:1.4; }
+
+  .sentimiento-bar { display:flex; height:12px; border-radius:6px; overflow:hidden; margin:14px 0 8px; }
+  .sent-pos { background:#6cb42c; }
+  .sent-neu { background:#c8d0da; }
+  .sent-neg { background:#c42e20; }
+  .sentimiento-legend { display:flex; gap:14px; flex-wrap:wrap; }
+  .sent-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--gris); font-weight:500; }
+  .sent-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+  .calendario-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .calendario-table { width:100%; border-collapse:collapse; min-width:700px; }
+  .calendario-table th { background:var(--azul); color:#fff; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:10px 12px; text-align:left; }
+  .calendario-table td { padding:9px 12px; font-size:11px; border-bottom:1px solid #f4f4f4; vertical-align:top; color:var(--gris-osc); line-height:1.4; }
+  .calendario-table tr:hover td { background:#fafafa; }
+  .pilar-tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; }
+  .pilar-infra  { background:#e8f1fb; color:var(--li-color); }
+  .pilar-vial   { background:#fef3cd; color:#8a6d00; }
+  .pilar-social { background:var(--verde-bg); color:#3a6418; }
+  .pilar-amb    { background:#e8f5e9; color:#2e7d32; }
+  .pilar-eng    { background:#f3e8ff; color:#6b21a8; }
+  .pilar-bts    { background:#fce7f0; color:#9b1e4a; }
+  .pilar-cierre { background:#f5f5f5; color:#555; }
+
+  /* ── ACORDEÓN ── */
+  .acord-wrap { margin-bottom:16px; }
+  .acord-btn {
+    width:100%; background:var(--blanco); border:1px solid var(--gris-borde);
+    border-radius:12px; padding:18px 22px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    cursor:pointer; transition:background .15s, border-color .15s;
+    text-align:left;
+  }
+  .acord-btn:hover { background:#fafafa; border-color:#c8d0da; }
+  .acord-btn.open  { border-radius:12px 12px 0 0; border-color:var(--azul); background:rgba(28,52,92,0.03); }
+  .acord-btn-left  { display:flex; align-items:center; gap:12px; }
+  .acord-icon-wrap { width:32px; height:32px; border-radius:8px; background:var(--fondo); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+  .acord-label     { font-size:12px; font-weight:700; color:var(--negro); }
+  .acord-sublabel  { font-size:11px; color:var(--gris); margin-top:1px; }
+  .acord-chevron   { flex-shrink:0; color:var(--gris); transition:transform .22s; }
+  .acord-btn.open .acord-chevron { transform:rotate(180deg); color:var(--azul); }
+  .acord-body {
+    background:var(--blanco);
+    border:1px solid var(--azul); border-top:none;
+    border-radius:0 0 12px 12px;
+    overflow:hidden;
+    max-height:0; transition:max-height .32s ease;
+    padding:0 22px;
+  }
+  .acord-body.open { max-height:4000px; padding:20px 22px 22px; }
+
+  /* ── FOOTER ── */
+  .site-footer { background:var(--azul); padding:20px 48px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .footer-text { font-size:11px; color:rgba(255,255,255,0.3); letter-spacing:0.03em; }
+  .footer-text strong { color:rgba(255,255,255,0.6); }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px){
+    .top-bar,.main-tabs,.filtros-bar,.main-content,.hero,.site-footer { padding-left:20px; padding-right:20px; }
+    .kpi-strip { grid-template-columns:1fr 1fr; }
+    .kpi-card.principal { grid-column:1/-1; }
+    .charts-grid { grid-template-columns:1fr; }
+    .men-grid { grid-template-columns:1fr; }
+    .comp-grid { grid-template-columns:1fr; }
+    .hero-titulo { font-size:26px; }
+    .hero { padding:24px 20px 28px; }
+    .hero::before { width:240px; height:240px; top:-60px; right:-60px; border-width:50px; }
+    .hero::after  { width:140px; height:140px; bottom:-40px; left:-40px; border-width:28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<header class="top-bar">
+  <div class="top-logos">
+    <div class="logo-rbn">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div class="logo-text">Ruta Bogotá Norte<span>Concesionaria</span></div>
+    </div>
+    <div class="logo-sep"></div>
+    <div class="logo-crop">CROP<span>Asuntos Públicos</span></div>
+  </div>
+  <div class="periodo-badge">
+    <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3" fill="white" opacity=".8"/></svg>
+    Abr – Jul 2026
+  </div>
+</header>
+
+<!-- ── MAIN TABS ── -->
+<nav class="main-tabs no-scrollbar">
+  <button class="main-tab active" onclick="showModule('li',this)">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+    LinkedIn
+  </button>
+  <button class="main-tab" onclick="showModule('fb',this)">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    Facebook
+  </button>
+  <button class="main-tab" onclick="showModule('men',this)">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Voz de la comunidad
+  </button>
+  <button class="main-tab" onclick="showModule('rec',this)">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    Recomendaciones
+  </button>
+  <button class="main-tab" onclick="showModule('plan',this)">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Plan de contenido
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════
+     MÓDULO 1 · LINKEDIN
+══════════════════════════════════ -->
+<div class="module visible" id="mod-li">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">Rendimiento en redes · LinkedIn</div>
+      <div class="hero-titulo">Concesionaria <em>Ruta Bogotá Norte</em></div>
+      <div class="hero-sub">Análisis de desempeño orgánico · <span id="liHeroMes">Abril 2026</span></div>
+      <div class="hero-kpis">
+        <div class="hero-kpi"><div class="hero-kpi-label">Impresiones totales</div><div class="hero-kpi-valor" id="liHeroImp">—</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Clics totales</div><div class="hero-kpi-valor" id="liHeroCli">—</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Publicaciones</div><div class="hero-kpi-valor" id="liHeroPosts">—</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Tasa interact. prom.</div><div class="hero-kpi-valor" id="liHeroTasa">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filtros-bar no-scrollbar">
+    <div class="filtros-label">Período</div>
+    <select class="filtro-select" id="liMesSelect" onchange="renderLI()">
+      <option value="2026-04">Abril 2026</option>
+      <option value="2026-05">Mayo 2026</option>
+      <option value="2026-06">Junio 2026</option>
+      <option value="2026-07">Julio 2026 (parcial)</option>
+    </select>
+    <div class="filtros-sep"></div>
+    <div class="filtros-label">Métrica en gráfica</div>
+    <select class="filtro-select" id="liMetricaSelect" onchange="renderLIChart()">
+      <option value="imp">Impresiones</option>
+      <option value="cli">Clics</option>
+      <option value="rea">Reacciones</option>
+    </select>
+    <span class="plat-badge li">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+      LinkedIn
+    </span>
+  </div>
+
+  <main class="main-content">
+    <!-- KPIs -->
+    <div class="kpi-strip">
+      <div class="kpi-card principal">
+        <div>
+          <div class="kpi-eyebrow">Impresiones totales</div>
+          <span class="kpi-num" id="liKpiImp">—</span>
+          <div class="kpi-desc">Visualizaciones acumuladas del período</div>
+        </div>
+        <div id="liKpiImpDelta" style="margin-top:10px"></div>
+      </div>
+      <div class="kpi-card"><div class="kpi-eyebrow">Clics</div><span class="kpi-num azul" id="liKpiCli">—</span><div class="kpi-desc" id="liKpiCliSub">—</div></div>
+      <div class="kpi-card"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="liKpiRea">—</span><div class="kpi-desc" id="liKpiReaSub">—</div></div>
+      <div class="kpi-card"><div class="kpi-eyebrow">Comentarios</div><span class="kpi-num" id="liKpiCom">—</span><div class="kpi-desc">interacciones</div></div>
+      <div class="kpi-card"><div class="kpi-eyebrow">Tasa interacción</div><span class="kpi-num verde" id="liKpiTasa">—</span><div class="kpi-desc">promedio orgánico</div></div>
+    </div>
+
+    <!-- Gráfica tendencia -->
+    <div class="charts-grid" style="grid-template-columns:1fr;">
+      <div class="chart-card full">
+        <div class="chart-titulo" id="liChartTitulo">Tendencia diaria · Impresiones</div>
+        <div class="chart-scroll-wrap scroll-fino">
+          <div class="chart-area tall"><canvas id="liChartTendencia"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparativa mensual -->
+    <div class="comp-card">
+      <div class="comp-titulo">Comparativa mensual · LinkedIn</div>
+      <div class="comp-grid" id="liCompGrid"></div>
+    </div>
+
+    <!-- Tabla de publicaciones -->
+    <div class="tabla-card">
+      <div class="tabla-header">
+        <div class="tabla-titulo">Publicaciones del período</div>
+      </div>
+      <div class="tabla-wrap scroll-fino">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Publicación</th>
+              <th style="text-align:right">Imp.</th>
+              <th style="text-align:right">Clics</th>
+              <th style="text-align:right">Reacc.</th>
+              <th style="text-align:right">Com.</th>
+              <th style="text-align:right">Tasa</th>
+            </tr>
+          </thead>
+          <tbody id="liTablaBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div><!-- /mod-li -->
+
+<!-- ══════════════════════════════════
+     MÓDULO 2 · FACEBOOK
+══════════════════════════════════ -->
+<div class="module" id="mod-fb">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">Rendimiento en redes · Facebook</div>
+      <div class="hero-titulo">Concesionaria <em>Ruta Bogotá Norte</em></div>
+      <div class="hero-sub">Análisis de desempeño · Página Ruta Bogotá Norte · <span id="fbHeroMes">Abril 2026</span></div>
+      <div class="hero-kpis">
+        <div class="hero-kpi"><div class="hero-kpi-label">Alcance total</div><div class="hero-kpi-valor" id="fbHeroAlc">—</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Visualizaciones</div><div class="hero-kpi-valor" id="fbHeroViz">—</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Publicaciones</div><div class="hero-kpi-valor" id="fbHeroPosts">—</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Reacciones</div><div class="hero-kpi-valor" id="fbHeroRea">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filtros-bar no-scrollbar">
+    <div class="filtros-label">Período</div>
+    <select class="filtro-select" id="fbMesSelect" onchange="renderFB()">
+      <option value="2026-04">Abril 2026</option>
+      <option value="2026-05">Mayo 2026</option>
+      <option value="2026-06">Junio 2026</option>
+      <option value="2026-07">Julio 2026 (parcial)</option>
+    </select>
+    <div class="filtros-sep"></div>
+    <div class="filtros-label">Métrica en gráfica</div>
+    <select class="filtro-select" id="fbMetricaSelect" onchange="renderFBChart()">
+      <option value="alc">Alcance</option>
+      <option value="imp">Visualizaciones</option>
+      <option value="rea">Reacciones</option>
+    </select>
+    <span class="plat-badge fb">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      Facebook
+    </span>
+  </div>
+
+  <main class="main-content">
+    <div class="kpi-strip">
+      <div class="kpi-card principal">
+        <div>
+          <div class="kpi-eyebrow">Alcance total</div>
+          <span class="kpi-num" id="fbKpiAlc">—</span>
+          <div class="kpi-desc">Personas únicas alcanzadas</div>
+        </div>
+        <div id="fbKpiAlcDelta" style="margin-top:10px"></div>
+      </div>
+      <div class="kpi-card"><div class="kpi-eyebrow">Visualizaciones</div><span class="kpi-num azul" id="fbKpiViz">—</span><div class="kpi-desc" id="fbKpiVizSub">—</div></div>
+      <div class="kpi-card"><div class="kpi-eyebrow">Reacciones</div><span class="kpi-num verde" id="fbKpiRea">—</span><div class="kpi-desc" id="fbKpiReaSub">—</div></div>
+      <div class="kpi-card"><div class="kpi-eyebrow">Comentarios</div><span class="kpi-num" id="fbKpiCom">—</span><div class="kpi-desc">interacciones</div></div>
+      <div class="kpi-card"><div class="kpi-eyebrow">Compartidos</div><span class="kpi-num verde" id="fbKpiSha">—</span><div class="kpi-desc">veces compartido</div></div>
+    </div>
+
+    <div class="charts-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="chart-card full">
+        <div class="chart-titulo" id="fbChartTitulo">Tendencia por publicación · Alcance</div>
+        <div class="chart-scroll-wrap scroll-fino">
+          <div class="chart-area tall"><canvas id="fbChartTendencia"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-titulo">Distribución por tipo de contenido</div>
+        <div class="chart-area"><canvas id="fbChartTipo"></canvas></div>
+        <div class="chart-legend" id="fbLegendTipo"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-titulo">Top 5 publicaciones · mayor alcance</div>
+        <div class="chart-area"><canvas id="fbChartTop"></canvas></div>
+      </div>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-titulo">Comparativa mensual · Facebook</div>
+      <div class="comp-grid" id="fbCompGrid"></div>
+    </div>
+
+    <div class="tabla-card">
+      <div class="tabla-header">
+        <div class="tabla-titulo">Publicaciones del período</div>
+      </div>
+      <div class="tabla-wrap scroll-fino">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Publicación</th>
+              <th style="text-align:right">Viz.</th>
+              <th style="text-align:right">Alcance</th>
+              <th style="text-align:right">Reacc.</th>
+              <th style="text-align:right">Com.</th>
+              <th style="text-align:right">Comp.</th>
+            </tr>
+          </thead>
+          <tbody id="fbTablaBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div><!-- /mod-fb -->
+
+<!-- ══════════════════════════════════
+     MÓDULO 3 · MENCIONES
+══════════════════════════════════ -->
+<div class="module" id="mod-men">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">Voz de la comunidad</div>
+      <div class="hero-titulo">Menciones y <em>comentarios</em></div>
+      <div class="hero-sub">Registro de interacciones en redes sociales · Período analizado</div>
+      <div class="hero-kpis">
+        <div class="hero-kpi"><div class="hero-kpi-label">Total menciones</div><div class="hero-kpi-valor">23</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Instagram</div><div class="hero-kpi-valor">15</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Facebook</div><div class="hero-kpi-valor">7</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">X (Twitter)</div><div class="hero-kpi-valor">1</div></div>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="men-grid">
+      <div class="men-stat-card">
+        <div class="kpi-eyebrow">Distribución por red social</div>
+        <div class="chart-area" style="height:200px;margin-top:12px;"><canvas id="menChartRed"></canvas></div>
+        <div class="chart-legend" id="menLegendRed"></div>
+      </div>
+      <div class="men-stat-card">
+        <div class="kpi-eyebrow" style="margin-bottom:14px">Menciones por canal</div>
+        <div class="men-red-bars">
+          <div class="men-bar-row">
+            <div class="men-bar-label" style="width:36px">IG</div>
+            <div class="men-bar-track"><div class="men-bar-fill" style="width:65%;background:#e1306c"></div></div>
+            <div class="men-bar-count">15</div>
+          </div>
+          <div class="men-bar-row">
+            <div class="men-bar-label" style="width:36px">FB</div>
+            <div class="men-bar-track"><div class="men-bar-fill" style="width:30%;background:var(--fb-color)"></div></div>
+            <div class="men-bar-count">7</div>
+          </div>
+          <div class="men-bar-row">
+            <div class="men-bar-label" style="width:36px">X</div>
+            <div class="men-bar-track"><div class="men-bar-fill" style="width:5%;background:#111"></div></div>
+            <div class="men-bar-count">1</div>
+          </div>
+        </div>
+        <div style="margin-top:22px;">
+          <div class="kpi-eyebrow" style="margin-bottom:10px">Temas más frecuentes</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="background:var(--verde-bg);color:#3a6418;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;">Empleo / vacantes</span>
+            <span style="background:var(--li-bg);color:var(--li-color);font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;">Inicio de obras</span>
+            <span style="background:#fce7f0;color:#9b1e4a;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;">Mujeres en Ruta</span>
+            <span style="background:#fef3cd;color:#8a6d00;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;">Felicitaciones</span>
+            <span style="background:#fde8e8;color:#c42e20;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;">Quejas / dudas</span>
+            <span style="background:#f0e8ff;color:#6b21a8;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;">Medio ambiente</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de menciones -->
+    <div class="comp-card">
+      <div class="comp-titulo">Registro completo de menciones</div>
+      <div class="men-list" id="menLista"></div>
+    </div>
+  </main>
+</div><!-- /mod-men -->
+
+<footer class="site-footer">
+  <div class="footer-text"><strong>Ruta Bogotá Norte</strong> · Dashboard Redes Sociales</div>
+  <div class="footer-text">Elaborado por <strong>CROP Asuntos Públicos</strong> · Actualizado: <span id="footerFecha"></span></div>
+</footer>
+
+<script>
+/* ════════════════════════════════════
+   DATOS EMBEBIDOS
+════════════════════════════════════ */
+const DATA = {"li_indicadores":{"2026-04":{"impresiones":37393,"impresiones_organicas":37393,"clics":3677,"reacciones":386,"comentarios":25,"compartidos":1,"tasa_interaccion":0.1069,"dias":[{"d":"15","imp":6448,"cli":352,"rea":47},{"d":"16","imp":2889,"cli":160,"rea":24},{"d":"17","imp":1663,"cli":73,"rea":16},{"d":"18","imp":1652,"cli":112,"rea":16},{"d":"19","imp":924,"cli":64,"rea":8},{"d":"20","imp":1413,"cli":53,"rea":4},{"d":"21","imp":926,"cli":40,"rea":6},{"d":"22","imp":4326,"cli":209,"rea":56},{"d":"23","imp":4370,"cli":507,"rea":55},{"d":"24","imp":2240,"cli":303,"rea":32},{"d":"25","imp":1385,"cli":171,"rea":12},{"d":"26","imp":898,"cli":59,"rea":9},{"d":"27","imp":1798,"cli":147,"rea":19},{"d":"28","imp":1336,"cli":147,"rea":11},{"d":"29","imp":3107,"cli":830,"rea":52},{"d":"30","imp":2018,"cli":450,"rea":19}]},"2026-05":{"impresiones":41888,"impresiones_organicas":41888,"clics":3496,"reacciones":440,"comentarios":15,"compartidos":4,"tasa_interaccion":0.1021,"dias":[{"d":"01","imp":909,"cli":175,"rea":12},{"d":"02","imp":862,"cli":117,"rea":8},{"d":"03","imp":1164,"cli":150,"rea":8},{"d":"04","imp":1317,"cli":147,"rea":13},{"d":"05","imp":1019,"cli":118,"rea":10},{"d":"06","imp":843,"cli":140,"rea":4},{"d":"07","imp":671,"cli":50,"rea":4},{"d":"08","imp":580,"cli":92,"rea":8},{"d":"09","imp":1203,"cli":113,"rea":5},{"d":"10","imp":1027,"cli":153,"rea":16},{"d":"11","imp":1291,"cli":153,"rea":24},{"d":"12","imp":3347,"cli":205,"rea":34},{"d":"13","imp":1797,"cli":168,"rea":21},{"d":"14","imp":1902,"cli":137,"rea":15},{"d":"15","imp":1690,"cli":144,"rea":15},{"d":"16","imp":2246,"cli":146,"rea":19},{"d":"17","imp":708,"cli":86,"rea":6},{"d":"18","imp":864,"cli":45,"rea":5},{"d":"19","imp":2052,"cli":176,"rea":16},{"d":"20","imp":1953,"cli":125,"rea":29},{"d":"21","imp":1270,"cli":104,"rea":9},{"d":"22","imp":1108,"cli":68,"rea":4},{"d":"23","imp":759,"cli":82,"rea":12},{"d":"24","imp":613,"cli":30,"rea":16},{"d":"25","imp":929,"cli":62,"rea":11},{"d":"26","imp":1845,"cli":110,"rea":21},{"d":"27","imp":2528,"cli":126,"rea":41},{"d":"28","imp":1940,"cli":61,"rea":15},{"d":"29","imp":1340,"cli":116,"rea":16},{"d":"30","imp":1274,"cli":83,"rea":14},{"d":"31","imp":837,"cli":14,"rea":9}]},"2026-06":{"impresiones":24777,"impresiones_organicas":24777,"clics":1786,"reacciones":334,"comentarios":4,"compartidos":2,"tasa_interaccion":0.254,"dias":[{"d":"01","imp":1210,"cli":39,"rea":7},{"d":"02","imp":1490,"cli":44,"rea":15},{"d":"03","imp":580,"cli":19,"rea":6},{"d":"04","imp":659,"cli":21,"rea":4},{"d":"05","imp":752,"cli":20,"rea":9},{"d":"06","imp":1191,"cli":64,"rea":20},{"d":"07","imp":1198,"cli":74,"rea":12},{"d":"08","imp":758,"cli":28,"rea":10},{"d":"09","imp":488,"cli":38,"rea":7},{"d":"10","imp":1038,"cli":66,"rea":32},{"d":"11","imp":1820,"cli":147,"rea":22},{"d":"12","imp":1161,"cli":87,"rea":12},{"d":"13","imp":640,"cli":33,"rea":13},{"d":"14","imp":639,"cli":36,"rea":8},{"d":"15","imp":717,"cli":49,"rea":15},{"d":"16","imp":289,"cli":30,"rea":7},{"d":"17","imp":627,"cli":26,"rea":12},{"d":"18","imp":503,"cli":15,"rea":11},{"d":"19","imp":1304,"cli":77,"rea":19},{"d":"20","imp":20,"cli":35,"rea":11},{"d":"21","imp":5,"cli":12,"rea":3},{"d":"22","imp":740,"cli":58,"rea":11},{"d":"23","imp":778,"cli":66,"rea":8},{"d":"24","imp":1081,"cli":303,"rea":12},{"d":"25","imp":666,"cli":82,"rea":1},{"d":"26","imp":1525,"cli":97,"rea":18},{"d":"27","imp":989,"cli":73,"rea":9},{"d":"28","imp":556,"cli":20,"rea":6},{"d":"29","imp":743,"cli":76,"rea":5},{"d":"30","imp":610,"cli":51,"rea":9}]},"2026-07":{"impresiones":6690,"impresiones_organicas":6690,"clics":402,"reacciones":104,"comentarios":0,"compartidos":0,"tasa_interaccion":0.4384,"dias":[{"d":"01","imp":1225,"cli":51,"rea":16},{"d":"02","imp":1235,"cli":50,"rea":23},{"d":"03","imp":656,"cli":43,"rea":3},{"d":"04","imp":535,"cli":25,"rea":5},{"d":"05","imp":301,"cli":24,"rea":2},{"d":"06","imp":112,"cli":21,"rea":2},{"d":"07","imp":17,"cli":28,"rea":7},{"d":"08","imp":16,"cli":33,"rea":11},{"d":"09","imp":282,"cli":25,"rea":6},{"d":"10","imp":966,"cli":29,"rea":8},{"d":"11","imp":325,"cli":18,"rea":5},{"d":"12","imp":507,"cli":41,"rea":7},{"d":"13","imp":513,"cli":14,"rea":9}]}},"li_posts":{"2026-04":[{"titulo":"En @RutaBogotaNorte promovemos el desarrollo de infraestructura sostenible que protege la biodiversidad y los recursos n","fecha":"29/04","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7455330061798371329","tipo":"Orgánico","imp":834,"cli":8,"rea":6,"com":0,"sha":0,"tasa":0.0168},{"titulo":"🚧🔔 ¡Ya iniciamos nuestra Reunión de Inicio de Obra! Desde la Concesionaria @RutaBogotaNorte damos apertura a este impor","fecha":"29/04","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7455270322649534464","tipo":"Orgánico","imp":5408,"cli":2032,"rea":101,"com":1,"sha":1,"tasa":0.3948},{"titulo":"🚧 Estamos a dos días de nuestra reunión de inicio de obra. Desde la Concesionaria @RutaBogotaNorte invitamos a todos lo","fecha":"27/04","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7454544564687888384","tipo":"Orgánico","imp":2254,"cli":159,"rea":24,"com":1,"sha":2,"tasa":0.0825},{"titulo":"Desde la Concesionaria @RutaBogotaNorte invitamos a la comunidad a participar en la reunión de inicio de obras de la amp","fecha":"23/04","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7453159143814881280","tipo":"Orgánico","imp":5434,"cli":1709,"rea":86,"com":0,"sha":4,"tasa":0.3311},{"titulo":"Desde la Concesionaria @RutaBogotaNorte conmemoramos el Día Internacional de la Tierra 🌍 Reafirmamos nuestro compromiso","fecha":"22/04","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7452761620130385920","tipo":"Orgánico","imp":988,"cli":12,"rea":6,"com":1,"sha":0,"tasa":0.0192},{"titulo":"Desde la Concesionaria @RutaBogotaNorte invitamos a la comunidad a nuestra reunión de inicio de obras, un espacio donde","fecha":"22/04","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7452749729051955200","tipo":"Orgánico","imp":7735,"cli":342,"rea":93,"com":5,"sha":5,"tasa":0.0575},{"titulo":"🤝✨ El día de hoy participamos en el Comité de Movilidad y Seguridad de la red de apoyo Asociación Red Borde Norte.","fecha":"17/04","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7451039184947019776","tipo":"Vídeo","imp":1996,"cli":89,"rea":8,"com":0,"sha":0,"tasa":0.0486}],"2026-05":[{"titulo":"🌾🤎 Hoy celebramos el Día del Campesino, reconociendo el esfuerzo, la dedicación y el amor por la tierra","fecha":"29/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7469402794651795458","tipo":"Orgánico","imp":340,"cli":3,"rea":4,"com":0,"sha":0,"tasa":0.0206},{"titulo":"🛣️📋 Hoy en nuestro ABC Vial: ¿Sabes qué son las actas de vecindad? Nuestra coordinadora Jurídico Predial nos cuenta","fecha":"29/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7469070615056986112","tipo":"Vídeo","imp":2979,"cli":238,"rea":51,"com":1,"sha":4,"tasa":0.0987},{"titulo":"🌿🌎 El progreso sostenible es el único camino hacia el futuro. Día Mundial del Medio Ambiente","fecha":"29/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7468678119328124928","tipo":"Orgánico","imp":392,"cli":6,"rea":7,"com":0,"sha":0,"tasa":0.0332},{"titulo":"🚲🌎 En el Día Mundial de la Bicicleta celebramos mucho más que un medio de transporte","fecha":"29/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7467953259421376514","tipo":"Orgánico","imp":264,"cli":0,"rea":3,"com":0,"sha":1,"tasa":0.0152},{"titulo":"🌳 Desde @RutaBogotaNorte trabajamos con compromiso y responsabilidad ambiental en cada etapa del traslado","fecha":"28/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7467590942514921473","tipo":"Orgánico","imp":650,"cli":14,"rea":6,"com":0,"sha":0,"tasa":0.0308},{"titulo":"👀 ¿Has visto uno de estos contenedores en nuestros corredores viales?","fecha":"27/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7467303994911289344","tipo":"Vídeo","imp":1425,"cli":47,"rea":14,"com":1,"sha":0,"tasa":0.0435},{"titulo":"Recuerda que cuentas con: 🚑 Ambulancia 🚓 Vehículos de inspección 🛠️ Carro taller 🚛 Grúa","fecha":"27/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7466896285468561408","tipo":"Vídeo","imp":1611,"cli":53,"rea":16,"com":0,"sha":0,"tasa":0.0428},{"titulo":"🛣️✨ ¡Tu viaje seguro es nuestro compromiso todos los días!","fecha":"27/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7466503728791965698","tipo":"Vídeo","imp":1150,"cli":26,"rea":18,"com":0,"sha":0,"tasa":0.0383},{"titulo":"☕🛣️ La infraestructura que nos conecta también impulsa el crecimiento de nuestros territorios","fecha":"27/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7466141385348304896","tipo":"Vídeo","imp":782,"cli":21,"rea":10,"com":0,"sha":1,"tasa":0.0409},{"titulo":"🌿🐦 Nuestros números cambian día a día. Censo de fauna en Accesos Norte Fase II","fecha":"28/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7465839000499408896","tipo":"Vídeo","imp":1317,"cli":33,"rea":19,"com":0,"sha":0,"tasa":0.0395},{"titulo":"Encuentro Estratégico sobre gestión social sostenible en la infraestructura vial","fecha":"27/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7465492404867842048","tipo":"Vídeo","imp":2153,"cli":105,"rea":23,"com":0,"sha":0,"tasa":0.0595},{"titulo":"En el proyecto Accesos Norte Fase II, desarrollo de infraestructura y protección ambiental avanzan juntos","fecha":"27/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7465441497790808065","tipo":"Vídeo","imp":1514,"cli":47,"rea":15,"com":0,"sha":1,"tasa":0.0416},{"titulo":"🚧✨ ¡El futuro de la maquinaria amarilla también se construye con el liderazgo de las mujeres!","fecha":"26/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7465129525111209984","tipo":"Vídeo","imp":1162,"cli":42,"rea":10,"com":0,"sha":2,"tasa":0.0465},{"titulo":"¿Sabías que el talento local impulsa el desarrollo de los grandes proyectos de infraestructura?","fecha":"26/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7465093502410948610","tipo":"Vídeo","imp":1560,"cli":54,"rea":25,"com":1,"sha":1,"tasa":0.0519},{"titulo":"Cada proceso natural cumple un papel fundamental en la protección de las especies y la biodiversidad","fecha":"22/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7463652806877683712","tipo":"Vídeo","imp":845,"cli":29,"rea":10,"com":0,"sha":0,"tasa":0.0462},{"titulo":"🚔✨ Seguimos trabajando por una movilidad más segura y coordinada para Sopó","fecha":"20/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7462840105909555200","tipo":"Vídeo","imp":1997,"cli":94,"rea":25,"com":0,"sha":1,"tasa":0.0601},{"titulo":"🌱 Desde @RutaBogotaNorte adelantando acciones ambientales previas al inicio de la obra civil","fecha":"19/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7462562007683280896","tipo":"Orgánico","imp":1605,"cli":73,"rea":15,"com":1,"sha":2,"tasa":0.0567},{"titulo":"Excelentes noticias para el municipio de Sopó 🚔✨ articulación con la Concesionaria","fecha":"19/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7462490607941398528","tipo":"Orgánico","imp":1143,"cli":203,"rea":7,"com":0,"sha":0,"tasa":0.1837},{"titulo":"🚗🔔 #OJO #PicoYPlaca regional en Bogotá este 18 de mayo","fecha":"18/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7462170302333026304","tipo":"Orgánico","imp":692,"cli":10,"rea":2,"com":0,"sha":1,"tasa":0.0188},{"titulo":"¡Hoy iniciamos con orgullo Mujeres en Ruta Norte! 🚜✅ Maquinaria Amarilla","fecha":"15/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7461196219697102848","tipo":"Vídeo","imp":1582,"cli":78,"rea":15,"com":0,"sha":1,"tasa":0.0594},{"titulo":"¡OFICIALMENTE EN RUTA! En marcha nuestro curso de Maquinaria Amarilla: Mujeres en Ruta Norte 🦸‍♀️🚜","fecha":"15/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7461170362483986432","tipo":"Vídeo","imp":3407,"cli":237,"rea":42,"com":3,"sha":2,"tasa":0.0834},{"titulo":"¿Te imaginas quién está detrás del poder de nuestra maquinaria? #MujeresEnRuta 💕🚧","fecha":"14/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7460805367057244160","tipo":"Orgánico","imp":1605,"cli":47,"rea":21,"com":1,"sha":0,"tasa":0.043},{"titulo":"¡Comprometidos con la seguridad vial en Sopó! ✅🤝 jornada de movilidad","fecha":"13/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7460433471019323392","tipo":"Vídeo","imp":1231,"cli":25,"rea":11,"com":1,"sha":0,"tasa":0.0301},{"titulo":"🚧 En toda gran obra, la confianza también se construye. Consorcio Constructores","fecha":"12/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7460040730879791104","tipo":"Vídeo","imp":2702,"cli":83,"rea":16,"com":1,"sha":2,"tasa":0.0377},{"titulo":"Desde @RutaBogotaNorte entregamos 10 kits de carretera a la Alcaldía de Sopó 🚗🦺","fecha":"11/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7459712869803192321","tipo":"Vídeo","imp":2533,"cli":135,"rea":34,"com":0,"sha":0,"tasa":0.0667},{"titulo":"Participamos en el encuentro de Gerencia con @SubaAlcaldia — sábado 9 de mayo","fecha":"11/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7459632795242491904","tipo":"Vídeo","imp":741,"cli":45,"rea":15,"com":1,"sha":0,"tasa":0.0823},{"titulo":"🌷🚧 Día de la Madre — mujeres que construyen los cimientos más importantes","fecha":"10/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7459279409397579776","tipo":"Vídeo","imp":1429,"cli":78,"rea":21,"com":1,"sha":0,"tasa":0.07},{"titulo":"Desde @RutaBogotaNorte participamos en el comité de seguridad de Makro","fecha":"09/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7458701988285919232","tipo":"Vídeo","imp":1473,"cli":51,"rea":10,"com":0,"sha":1,"tasa":0.0421},{"titulo":"🚗🔔 #OJO #PicoYPlaca regional puente festivo del 3 mayo","fecha":"03/05","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7456739900579778561","tipo":"Orgánico","imp":1011,"cli":58,"rea":5,"com":0,"sha":0,"tasa":0.0623}],"2026-06":[{"titulo":"📢 ¡Es hoy! Invitamos a conectarse y conocer más sobre el proyecto","fecha":"30/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7477694504385380352","tipo":"Orgánico","imp":298,"cli":6,"rea":6,"com":0,"sha":0,"tasa":0.0403},{"titulo":"🚗🔔 #OJO #PicoYPlaca regional en Bogotá este 29 de junio","fecha":"29/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7477402336131334144","tipo":"Orgánico","imp":442,"cli":71,"rea":1,"com":0,"sha":0,"tasa":0.1629},{"titulo":"🇨🇴⚽ ¡Hoy juega Colombia! Vivamos la pasión con responsabilidad","fecha":"27/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7476770786914103297","tipo":"Orgánico","imp":309,"cli":1,"rea":1,"com":0,"sha":0,"tasa":0.0065},{"titulo":"☕🇨🇴 Día Nacional del Café — Colombia, tradición y cultura","fecha":"27/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7476722708244852736","tipo":"Vídeo","imp":358,"cli":6,"rea":3,"com":0,"sha":0,"tasa":0.0251},{"titulo":"¿Sabías que trabajamos de la mano con las entidades distritales? Secretaría Distrital","fecha":"26/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7476299328752631809","tipo":"Vídeo","imp":2126,"cli":115,"rea":20,"com":0,"sha":1,"tasa":0.064},{"titulo":"🚧👷‍♀️ Participamos en The Maker — iniciativa de @escuelaing","fecha":"25/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7476036950618116097","tipo":"Vídeo","imp":848,"cli":34,"rea":5,"com":0,"sha":0,"tasa":0.046},{"titulo":"🌿🚧 Labores de mantenimiento del corredor vial — Ruta Bogotá Norte","fecha":"23/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7475306613965455360","tipo":"Orgánico","imp":1298,"cli":594,"rea":14,"com":0,"sha":2,"tasa":0.47},{"titulo":"Capacitación en el barrio Verbenal II orientada a la promoción de derechos","fecha":"22/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7474929624381259776","tipo":"Vídeo","imp":714,"cli":25,"rea":8,"com":0,"sha":0,"tasa":0.0462},{"titulo":"Distintas motivaciones, una misma meta: crear nuevas oportunidades 🚜✨","fecha":"22/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7474890181095964672","tipo":"Vídeo","imp":695,"cli":33,"rea":4,"com":0,"sha":0,"tasa":0.0532},{"titulo":"¡El poder femenino se toma las pistas de práctica! #MujeresEnRutaNorte","fecha":"19/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7473764297169436672","tipo":"Vídeo","imp":1380,"cli":111,"rea":36,"com":0,"sha":3,"tasa":0.1087},{"titulo":"🐾🌿 Beneficios de los pasos de fauna — bióloga explica","fecha":"18/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7473479526753329152","tipo":"Vídeo","imp":930,"cli":39,"rea":25,"com":1,"sha":1,"tasa":0.071},{"titulo":"Feliz Día del Padre desde @RutaBogotáNorte 💙","fecha":"14/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7472016429945483264","tipo":"Vídeo","imp":937,"cli":37,"rea":15,"com":0,"sha":4,"tasa":0.0598},{"titulo":"¿Sabías que un segundo puede cambiarlo todo? Seguridad vial","fecha":"13/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7471635234350993408","tipo":"Orgánico","imp":358,"cli":1,"rea":3,"com":0,"sha":0,"tasa":0.0112},{"titulo":"¿Sabías que el corredor vial es el hogar de una maravillosa diversidad de aves?","fecha":"11/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7470900387789770752","tipo":"Orgánico","imp":826,"cli":129,"rea":20,"com":0,"sha":0,"tasa":0.1804},{"titulo":"Reunión de Inicio de Obras con @RedDeApoyoBordeNorte","fecha":"10/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7470520902141779970","tipo":"Vídeo","imp":2559,"cli":126,"rea":36,"com":0,"sha":4,"tasa":0.0649},{"titulo":"¡Teoría, tecnología y mucha pasión! Curso maquinaria #MujeresEnRutaNorte","fecha":"10/06","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7470476266958336001","tipo":"Orgánico","imp":704,"cli":120,"rea":15,"com":0,"sha":1,"tasa":0.1932}],"2026-07":[{"titulo":"🚗🔔 #OJO #PicoYPlaca regional en Bogotá este 13 de julio","fecha":"13/07","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7482466934651924480","tipo":"Orgánico","imp":223,"cli":2,"rea":1,"com":0,"sha":0,"tasa":0.0135},{"titulo":"🚴‍♀️💙 Participamos en la jornada Registra tu Bici Bogotá","fecha":"12/07","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7481902089519075328","tipo":"Vídeo","imp":542,"cli":10,"rea":9,"com":0,"sha":0,"tasa":0.0351},{"titulo":"Desde @RutaBogotáNorte: #MujeresEnLaRutaNorte para la @AlcaldiaSopo 💛","fecha":"09/07","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7481105644922720257","tipo":"Vídeo","imp":1279,"cli":29,"rea":18,"com":0,"sha":0,"tasa":0.0367},{"titulo":"⚽ ¿Cuánto queda el marcador? Pronóstico Colombia","fecha":"07/07","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7480316495215022080","tipo":"Orgánico","imp":64,"cli":4,"rea":3,"com":0,"sha":0,"tasa":0.1094},{"titulo":"💡 ¿Sabías que...? Actas de vecindad en bienes de uso público","fecha":"07/07","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7480315644446507008","tipo":"Vídeo","imp":390,"cli":50,"rea":9,"com":0,"sha":0,"tasa":0.1513},{"titulo":"⚽ ¡Hoy juega Colombia! Llega a tiempo — seguridad vial y Selección","fecha":"04/07","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7478966080783233024","tipo":"Orgánico","imp":255,"cli":13,"rea":2,"com":0,"sha":0,"tasa":0.0588},{"titulo":"🤝 Mesa de Diálogo del Terminal Norte — Secretaría de Gobierno","fecha":"03/07","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7478896783016939520","tipo":"Vídeo","imp":430,"cli":14,"rea":2,"com":0,"sha":0,"tasa":0.0372},{"titulo":"🔊 Podcast: cómo avanza la transformación del norte de Bogotá (ed. 2)","fecha":"01/07","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7478180256386953217","tipo":"Vídeo","imp":649,"cli":11,"rea":6,"com":0,"sha":0,"tasa":0.0262},{"titulo":"🚧 Podcast: transformación del norte de Bogotá — nueva edición","fecha":"01/07","enlace":"https://www.linkedin.com/feed/update/urn:li:activity:7478168091865055235","tipo":"Vídeo","imp":1374,"cli":36,"rea":19,"com":0,"sha":1,"tasa":0.0408}]},"fb":{"2026-04":{"visualizaciones":79713,"alcance":55650,"reacciones":291,"comentarios":19,"compartidos":21,"clics":2033,"posts_count":7,"daily":[{"dia":"17","imp":783,"alc":850,"rea":6},{"dia":"22","imp":28546,"alc":20999,"rea":67},{"dia":"23","imp":35325,"alc":23769,"rea":116},{"dia":"27","imp":10022,"alc":6948,"rea":39},{"dia":"29","imp":5037,"alc":3084,"rea":63}],"posts":[{"titulo":"Desde @RutaBogotaNorte conmemoramos el Día Internacional de la Tierra 🌍","fecha":"22/04","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02BqgBNWkW3WFESgkH4gvP6hpr8qs7845L1N6ufPqMShGbqkkkJPRNLmqbVhkNQzZl&id=61557413220608","tipo":"Fotos","viz":695,"alc":377,"rea":6,"com":0,"sha":0,"cli":3},{"titulo":"Invitamos a la comunidad a participar en la reunión de inicio de obras de la ampliación","fecha":"23/04","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0vKRywfkBBPcnXCNnBov3dmS9q31Ndoh4v8XwDDrXr6N9tiHeoCPsxw9Pnk6Mb2bxl&id=61557413220608","tipo":"Fotos","viz":35325,"alc":23769,"rea":116,"com":11,"sha":8,"cli":1033},{"titulo":"🚧 Estamos a dos días de nuestra reunión de inicio de obra","fecha":"27/04","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0fRFYNitT9vpfLqfWbxfU6xBZs2ibdS2FuNbjycqyQSzniYss82XAAfgkTtoJYaU8l&id=61557413220608","tipo":"Fotos","viz":10022,"alc":6948,"rea":39,"com":5,"sha":6,"cli":321},{"titulo":"🚧🔔 ¡Ya iniciamos nuestra Reunión de Inicio de Obra!","fecha":"29/04","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02jLjcitjwMZL1w6dXBkcMsYfx8jv7pbANXjyKBbPQ97bN4nbwnSc1cYJq8xK5nYfnl&id=61557413220608","tipo":"Fotos","viz":4408,"alc":2734,"rea":58,"com":3,"sha":3,"cli":367},{"titulo":"Infraestructura sostenible que protege la biodiversidad y los recursos naturales","fecha":"29/04","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0qvCzL2vsaj5sivEDd42Qt9mUbGAzcknhTbw2N5B8zGyiSnUCCZLe4y8sWaMme2Yvl&id=61557413220608","tipo":"Fotos","viz":629,"alc":350,"rea":5,"com":0,"sha":0,"cli":2},{"titulo":"🤝✨ Comité de Movilidad y Seguridad — Red de Apoyo Asociación Red Borde Norte","fecha":"17/04","enlace":"https://www.facebook.com/reel/840325208396708/","tipo":"Videos","viz":783,"alc":850,"rea":6,"com":0,"sha":0,"cli":9},{"titulo":"Reunión de inicio de obras — espacio de participación comunitaria","fecha":"22/04","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02yXJga9mKzfAaozXbvTUdK58YLyxcX41XoQjCmrz8UFxPMy2evREUonHoydfuHmqil&id=61557413220608","tipo":"Fotos","viz":27851,"alc":20622,"rea":61,"com":0,"sha":4,"cli":298}]},"2026-05":{"visualizaciones":33158,"alcance":30500,"reacciones":383,"comentarios":23,"compartidos":31,"clics":781,"posts_count":23,"daily":[{"dia":"03","imp":1230,"alc":852,"rea":5},{"dia":"08","imp":647,"alc":707,"rea":11},{"dia":"10","imp":504,"alc":605,"rea":7},{"dia":"11","imp":1942,"alc":2494,"rea":34},{"dia":"12","imp":945,"alc":1001,"rea":16},{"dia":"13","imp":2505,"alc":2753,"rea":12},{"dia":"14","imp":3858,"alc":2341,"rea":23},{"dia":"15","imp":4741,"alc":6571,"rea":77},{"dia":"18","imp":746,"alc":500,"rea":3},{"dia":"19","imp":3484,"alc":2249,"rea":30},{"dia":"20","imp":1205,"alc":1110,"rea":25},{"dia":"22","imp":876,"alc":654,"rea":13},{"dia":"26","imp":3887,"alc":3271,"rea":34},{"dia":"27","imp":1687,"alc":1430,"rea":27},{"dia":"28","imp":1635,"alc":1341,"rea":22},{"dia":"29","imp":669,"alc":428,"rea":6},{"dia":"30","imp":1025,"alc":747,"rea":15},{"dia":"31","imp":1572,"alc":1446,"rea":23}],"posts":[{"titulo":"🚗🔔 #OJO #PicoYPlaca regional en Bogotá — 3 de mayo","fecha":"03/05","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02xDqm47F4VSrMKzEaeCbgycj3LyyHCFe8svNDUFDE9TWbmK17FG5JdwUMGZb5cK5Xl&id=61557413220608","tipo":"Fotos","viz":1230,"alc":852,"rea":5,"com":0,"sha":0,"cli":16},{"titulo":"Mesa de diálogo del terminal norte — liderado por la Secretaría","fecha":"08/05","enlace":"https://www.facebook.com/reel/1166576912240754/","tipo":"Videos","viz":647,"alc":707,"rea":11,"com":1,"sha":0,"cli":12},{"titulo":"🌷🚧 Día de la Madre — mujeres que construyen los cimientos","fecha":"10/05","enlace":"https://www.facebook.com/reel/3230022440516341/","tipo":"Videos","viz":504,"alc":605,"rea":7,"com":1,"sha":0,"cli":14},{"titulo":"Participamos en encuentro de Gerencia con @SubaAlcaldia — 9 de mayo","fecha":"11/05","enlace":"https://www.facebook.com/reel/1344712820882974/","tipo":"Videos","viz":758,"alc":951,"rea":11,"com":0,"sha":0,"cli":11},{"titulo":"Entregamos 10 kits de carretera a la Alcaldía de Sopó 🚗🦺","fecha":"11/05","enlace":"https://www.facebook.com/reel/957853613766097/","tipo":"Videos","viz":1184,"alc":1543,"rea":23,"com":1,"sha":0,"cli":45},{"titulo":"🚧 En toda gran obra, la confianza también se construye. Consorcio","fecha":"12/05","enlace":"https://www.facebook.com/reel/2837728359906221/","tipo":"Videos","viz":945,"alc":1001,"rea":16,"com":1,"sha":1,"cli":14},{"titulo":"Comprometidos con la seguridad vial en Sopó — jornada de movilidad","fecha":"13/05","enlace":"https://www.facebook.com/reel/762323340208474/","tipo":"Videos","viz":2505,"alc":2753,"rea":12,"com":0,"sha":1,"cli":11},{"titulo":"#MujeresEnRuta — ¿quién está detrás del poder de nuestra maquinaria?","fecha":"14/05","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0dsUs9N8osbjcG9fcy1ZX7JQNPYx81m7Rp1YQrEfFqwXvhxcrcMi2oPb7d5BXh6url&id=61557413220608","tipo":"Fotos","viz":3858,"alc":2341,"rea":23,"com":8,"sha":3,"cli":110},{"titulo":"¡OFICIALMENTE EN RUTA! Mujeres en Ruta Norte — Maquinaria Amarilla 🦸‍♀️🚜","fecha":"15/05","enlace":"https://www.facebook.com/reel/1552766299745187/","tipo":"Videos","viz":3461,"alc":5287,"rea":54,"com":2,"sha":7,"cli":171},{"titulo":"¡Hoy iniciamos Mujeres en Ruta Norte! 🚜✅ Así se vivió el inicio","fecha":"15/05","enlace":"https://www.facebook.com/reel/1287678032981604/","tipo":"Videos","viz":1280,"alc":1284,"rea":23,"com":0,"sha":4,"cli":24},{"titulo":"🚗🔔 #OJO #PicoYPlaca regional — 18 de mayo","fecha":"18/05","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0XH2X8PQxt9SkndyHddN62SfyCZABTQ8L7Kusa3eVdKPrn39qk8ZoaCmHWBxyGah6l&id=61557413220608","tipo":"Fotos","viz":746,"alc":500,"rea":3,"com":0,"sha":0,"cli":7},{"titulo":"Excelentes noticias para el municipio de Sopó 🚔✨","fecha":"19/05","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0iLCXaFToLn5b8i3yCAaVWNf6iWsdamUSq4fFVPsxqVsmNHgsU5jfAcjWMdHFfXQDl&id=61557413220608","tipo":"Fotos","viz":2788,"alc":1823,"rea":21,"com":1,"sha":3,"cli":140},{"titulo":"🌱 Acciones ambientales previas al inicio de la obra civil","fecha":"19/05","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02VLDGf3WiHVDSWPwmtvyPYopY5gmeqcmi55gvGMBCsYKHysg9TJvrqMae5rr8S7RJl&id=61557413220608","tipo":"Fotos","viz":696,"alc":426,"rea":9,"com":0,"sha":1,"cli":21},{"titulo":"🚔✨ Movilidad más segura y coordinada para Sopó","fecha":"20/05","enlace":"https://www.facebook.com/reel/906688772434690/","tipo":"Videos","viz":1205,"alc":1110,"rea":25,"com":1,"sha":3,"cli":23},{"titulo":"🐣🌿 ¿Sabías que esperar a que los parentales empollen sus huevos es vital?","fecha":"22/05","enlace":"https://www.facebook.com/reel/2382542495584079/","tipo":"Videos","viz":876,"alc":654,"rea":13,"com":1,"sha":0,"cli":7},{"titulo":"El talento local impulsa el desarrollo de los grandes proyectos de infraestructura","fecha":"26/05","enlace":"https://www.facebook.com/reel/981084377954178/","tipo":"Videos","viz":1423,"alc":979,"rea":9,"com":0,"sha":1,"cli":13},{"titulo":"🚧✨ El futuro de la maquinaria también se construye con mujeres","fecha":"26/05","enlace":"https://www.facebook.com/reel/4557337867873407/","tipo":"Videos","viz":1683,"alc":1758,"rea":16,"com":0,"sha":1,"cli":23},{"titulo":"Encuentro Estratégico sobre gestión social sostenible en infraestructura vial","fecha":"26/05","enlace":"https://www.facebook.com/reel/1801467810816270/","tipo":"Videos","viz":781,"alc":534,"rea":9,"com":0,"sha":1,"cli":4},{"titulo":"Accesos Norte Fase II — infraestructura y protección ambiental avanzan juntos","fecha":"27/05","enlace":"https://www.facebook.com/reel/2183077442530295/","tipo":"Videos","viz":1687,"alc":1430,"rea":27,"com":2,"sha":1,"cli":31},{"titulo":"🌿🐦 Censo de fauna en Accesos Norte Fase II — nuestros números","fecha":"28/05","enlace":"https://www.facebook.com/reel/1631721187908787/","tipo":"Videos","viz":1635,"alc":1341,"rea":22,"com":3,"sha":1,"cli":33},{"titulo":"☕🛣️ La infraestructura que nos conecta impulsa el crecimiento de los territorios","fecha":"29/05","enlace":"https://www.facebook.com/reel/1362272755767654/","tipo":"Videos","viz":669,"alc":428,"rea":6,"com":0,"sha":0,"cli":4},{"titulo":"🛣️✨ Tu viaje seguro es nuestro compromiso todos los días","fecha":"30/05","enlace":"https://www.facebook.com/reel/2247009509463504/","tipo":"Videos","viz":1025,"alc":747,"rea":15,"com":0,"sha":1,"cli":11},{"titulo":"Recuerda que cuentas con ambulancia, vehículos de inspección, carro taller, grúa","fecha":"31/05","enlace":"https://www.facebook.com/reel/1425735699602510/","tipo":"Videos","viz":1572,"alc":1446,"rea":23,"com":1,"sha":2,"cli":36}]},"2026-06":{"visualizaciones":43284,"alcance":34770,"reacciones":328,"comentarios":24,"compartidos":27,"clics":979,"posts_count":22,"daily":[{"dia":"01","imp":1564,"alc":988,"rea":12},{"dia":"02","imp":527,"alc":355,"rea":8},{"dia":"03","imp":626,"alc":438,"rea":7},{"dia":"05","imp":420,"alc":275,"rea":3},{"dia":"06","imp":1295,"alc":940,"rea":10},{"dia":"07","imp":515,"alc":343,"rea":6},{"dia":"10","imp":9124,"alc":7011,"rea":39},{"dia":"11","imp":403,"alc":261,"rea":7},{"dia":"13","imp":604,"alc":396,"rea":4},{"dia":"14","imp":784,"alc":552,"rea":11},{"dia":"18","imp":1810,"alc":1079,"rea":23},{"dia":"19","imp":7189,"alc":6897,"rea":80},{"dia":"22","imp":5852,"alc":5755,"rea":44},{"dia":"23","imp":4909,"alc":3314,"rea":17},{"dia":"25","imp":1392,"alc":895,"rea":10},{"dia":"26","imp":4264,"alc":4025,"rea":26},{"dia":"27","imp":1307,"alc":818,"rea":13},{"dia":"29","imp":262,"alc":172,"rea":4},{"dia":"30","imp":437,"alc":256,"rea":4}],"posts":[{"titulo":"👀 ¿Has visto uno de estos contenedores en nuestros corredores viales?","fecha":"01/06","enlace":"https://www.facebook.com/reel/2827823340909361/","tipo":"Videos","viz":1564,"alc":988,"rea":12,"com":0,"sha":0,"cli":9},{"titulo":"Responsabilidad ambiental en cada etapa del traslado de árboles","fecha":"02/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02yaoNpdv7hdkJtZxTReEr57aG4rLj99E5oxrcQQ2KuLKBeNXZYporRQhtoUKa2ecYl&id=61557413220608","tipo":"Fotos","viz":527,"alc":355,"rea":8,"com":2,"sha":1,"cli":6},{"titulo":"🚲🌎 Día Mundial de la Bicicleta — movilidad y conciencia ambiental","fecha":"03/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02tWb6ytJNWo39cY95rXQuoNBw5HBx3KXPZymRoUCxshvxKfAU9bFk2zazUPCL72Tml&id=61557413220608","tipo":"Fotos","viz":626,"alc":438,"rea":7,"com":0,"sha":0,"cli":6},{"titulo":"🌿🌎 Día Mundial del Medio Ambiente — progreso sostenible","fecha":"05/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02bHyJch1BW3wcGUgVdAvzyt97TbNVmNyHCy4ZKXuSRAA214sWP5LrUdidBw4UYPo3l&id=61557413220608","tipo":"Fotos","viz":420,"alc":275,"rea":3,"com":1,"sha":0,"cli":1},{"titulo":"🛣️📋 ABC Vial: ¿Sabes qué son las actas de vecindad?","fecha":"06/06","enlace":"https://www.facebook.com/reel/1913976842624821/","tipo":"Videos","viz":1295,"alc":940,"rea":10,"com":0,"sha":0,"cli":9},{"titulo":"🌾🤎 Día del Campesino — amor por la tierra","fecha":"07/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0EdwLieTgiqc1SX33NzQ9bTR6vj8Wera4NpCo4BP4rg67nnH88hgTEVND4fcaon55l&id=61557413220608","tipo":"Fotos","viz":515,"alc":343,"rea":6,"com":1,"sha":1,"cli":1},{"titulo":"¡Teoría, tecnología y pasión! Maquinaria amarilla #MujeresEnRutaNorte","fecha":"10/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02zf3s2A7esgU5hTRTXoNS7Xmo1wzJLKPLaG99bTFwFTJ9AwZrKxhRdtmfPWC39X7gl&id=61557413220608","tipo":"Fotos","viz":7161,"alc":5073,"rea":12,"com":1,"sha":1,"cli":210},{"titulo":"Reunión de Inicio de Obras con @RedDeApoyoBordeNorte","fecha":"10/06","enlace":"https://www.facebook.com/reel/36177566458525012/","tipo":"Videos","viz":1963,"alc":1938,"rea":27,"com":0,"sha":3,"cli":40},{"titulo":"¿Sabías que el corredor vial es hogar de una maravillosa diversidad de aves?","fecha":"11/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0rhCg3Xt24x1t2W2ijfPdhocEhTamWX8ouhR1PjgkopPcth4dtt6bVEUWR2D8pH5Ql&id=61557413220608","tipo":"Fotos","viz":403,"alc":261,"rea":7,"com":0,"sha":0,"cli":5},{"titulo":"¿Sabías que un segundo puede cambiarlo todo? Seguridad vial","fecha":"13/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid08ZBvG2fe5zrNUJsxvrooMm9rbXPSRZB5ZWsjnLHbSaM5XQ2gsqjw9FGAAen3C3MLl&id=61557413220608","tipo":"Fotos","viz":604,"alc":396,"rea":4,"com":0,"sha":0,"cli":4},{"titulo":"Feliz Día del Padre desde @RutaBogotáNorte 💙","fecha":"14/06","enlace":"https://www.facebook.com/reel/861578013661801/","tipo":"Videos","viz":784,"alc":552,"rea":11,"com":1,"sha":0,"cli":5},{"titulo":"🐾🌿 Beneficios de los pasos de fauna — nuestra bióloga explica","fecha":"18/06","enlace":"https://www.facebook.com/reel/2426404714526627/","tipo":"Videos","viz":1810,"alc":1079,"rea":23,"com":2,"sha":5,"cli":27},{"titulo":"¡El poder femenino se toma las pistas de práctica! #MujeresEnRutaNorte","fecha":"19/06","enlace":"https://www.facebook.com/reel/1043418438122900/","tipo":"Videos","viz":7189,"alc":6897,"rea":80,"com":7,"sha":5,"cli":254},{"titulo":"Distintas motivaciones, una misma meta: crear nuevas oportunidades 🚜✨","fecha":"22/06","enlace":"https://www.facebook.com/reel/1766047951332124/","tipo":"Videos","viz":4477,"alc":4607,"rea":25,"com":2,"sha":3,"cli":84},{"titulo":"Capacitación en el barrio Verbenal II — promoción de derechos","fecha":"22/06","enlace":"https://www.facebook.com/reel/3303518283161585/","tipo":"Videos","viz":1375,"alc":1148,"rea":19,"com":0,"sha":1,"cli":4},{"titulo":"🌿🚧 Labores de mantenimiento del corredor vial","fecha":"23/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0n74G9dbFdcN2ZVVvQVVFBH6TgkrvcR82V91F1cUwweZVamv9BDQZZA1JZkbuiLZdl&id=61557413220608","tipo":"Fotos","viz":4909,"alc":3314,"rea":17,"com":1,"sha":4,"cli":217},{"titulo":"Participamos en The Maker — iniciativa @escuelaing 🚧👷‍♀️","fecha":"25/06","enlace":"https://www.facebook.com/reel/1213813967468777/","tipo":"Videos","viz":1392,"alc":895,"rea":10,"com":2,"sha":0,"cli":9},{"titulo":"Articulación con entidades distritales — Secretaría Distrital de Integración Social","fecha":"26/06","enlace":"https://www.facebook.com/reel/1543864323956678/","tipo":"Videos","viz":4264,"alc":4025,"rea":26,"com":3,"sha":2,"cli":65},{"titulo":"☕🇨🇴 Día Nacional del Café — Colombia, tradición y cultura","fecha":"27/06","enlace":"https://www.facebook.com/reel/1006020088948714/","tipo":"Videos","viz":868,"alc":503,"rea":7,"com":0,"sha":1,"cli":1},{"titulo":"🇨🇴⚽ ¡Hoy juega Colombia! Seguridad vial y pasión por la Selección","fecha":"27/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid04wccf7L8YfKW4j8171HjusFY3eHHxfTYdN6mE2hj5dUUXsQ5CdW9YGLveAyWPPzsl&id=61557413220608","tipo":"Fotos","viz":439,"alc":315,"rea":6,"com":1,"sha":0,"cli":3},{"titulo":"🚗🔔 #PicoYPlaca regional en Bogotá — 29 de junio","fecha":"29/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0KWMXDWZmeRhupsQ62FZGdU35sN55ALq5hFYULkaVB2aQ96rVvfzLobPUJ666g9dJl&id=61557413220608","tipo":"Fotos","viz":262,"alc":172,"rea":4,"com":0,"sha":0,"cli":2},{"titulo":"📢 ¡Es hoy! Invitamos a todos a conectarse y conocer el proyecto","fecha":"30/06","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid0d79AHr5D7fm3zA6LWcLU2R1MXWFUCkCfKgSpwsYQzYxV39SRWqNGyzAacxMd3DXTl&id=61557413220608","tipo":"Fotos","viz":437,"alc":256,"rea":4,"com":0,"sha":0,"cli":17}]},"2026-07":{"visualizaciones":27412,"alcance":23599,"reacciones":232,"comentarios":14,"compartidos":17,"clics":701,"posts_count":9,"daily":[{"dia":"01","imp":4163,"alc":3894,"rea":45},{"dia":"03","imp":1563,"alc":1068,"rea":11},{"dia":"07","imp":5493,"alc":4500,"rea":37},{"dia":"09","imp":13891,"alc":12647,"rea":117},{"dia":"11","imp":1800,"alc":1138,"rea":19},{"dia":"13","imp":502,"alc":352,"rea":3}],"posts":[{"titulo":"🚧 Podcast: el norte de Bogotá está cambiando — nueva edición","fecha":"01/07","enlace":"https://www.facebook.com/reel/1354367889975913/","tipo":"Videos","viz":3558,"alc":3439,"rea":38,"com":1,"sha":2,"cli":116},{"titulo":"🔊 ¡Súbele al volumen! Transformación del norte de Bogotá","fecha":"01/07","enlace":"https://www.facebook.com/reel/1610563217307565/","tipo":"Videos","viz":605,"alc":455,"rea":7,"com":1,"sha":2,"cli":0},{"titulo":"🤝 Mesa de Diálogo del Terminal Norte — Secretaría de Gobierno","fecha":"03/07","enlace":"https://www.facebook.com/reel/2282523369151974/","tipo":"Videos","viz":1224,"alc":855,"rea":7,"com":2,"sha":1,"cli":10},{"titulo":"⚽ ¡Hoy juega Colombia! Seguridad vial y pasión por la Sele","fecha":"03/07","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid026qNPULJNHYHswNgqHoXZ2TfJpUcsqU3N1va2VW19AM19dowBipipbr5dmddDkhGFl&id=61557413220608","tipo":"Fotos","viz":339,"alc":213,"rea":4,"com":1,"sha":1,"cli":3},{"titulo":"💡 ¿Sabías que...? Actas de vecindad en bienes de uso público","fecha":"07/07","enlace":"https://www.facebook.com/reel/2091769135068936/","tipo":"Videos","viz":4763,"alc":4017,"rea":31,"com":3,"sha":1,"cli":66},{"titulo":"⚽ ¿Cuánto queda el marcador? Pronóstico Colombia","fecha":"07/07","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid035m7qobCfgamTYNk7Z48EpxAsCt7sgP8L24BfhKfdbEGEV1VYA35xcQGi4AHAuHF5l&id=61557413220608","tipo":"Fotos","viz":730,"alc":483,"rea":6,"com":3,"sha":2,"cli":9},{"titulo":"Desde @RutaBogotáNorte: #MujeresEnLaRutaNorte para la @AlcaldiaSopo 💛","fecha":"09/07","enlace":"https://www.facebook.com/reel/1347980520769349/","tipo":"Videos","viz":13891,"alc":12647,"rea":117,"com":3,"sha":7,"cli":480},{"titulo":"🚴‍♀️💙 Jornada Registra tu Bici Bogotá — Terminal del Norte","fecha":"11/07","enlace":"https://www.facebook.com/reel/2466246773853718/","tipo":"Videos","viz":1800,"alc":1138,"rea":19,"com":0,"sha":0,"cli":12},{"titulo":"🚗🔔 #PicoYPlaca regional en Bogotá — 13 de julio","fecha":"13/07","enlace":"https://www.facebook.com/permalink.php?story_fbid=pfbid02BZADbf4TYmm3DDoPTaEHVfwNGf3drujP28EBHURkbGLJytf838c4Ct7qqoazEbVyl&id=61557413220608","tipo":"Fotos","viz":502,"alc":352,"rea":3,"com":0,"sha":1,"cli":5}]}},"menciones":[{"red":"X","usuario":"Ivan Arevalo / @idareval","comentario":"RutaBogotaNorte ya van 2 meses de la firma del acta de inicio y aún no se ve inicio de obras. Cuando se verá maquinaria y personas trabajando en la ampliación?"},{"red":"FB","usuario":"Rosi Dias","comentario":"Alcaldía de Sopó está bien que hagan esas cosas. Pero capaciten a los funcionarios y contratistas para que las obras queden bien. Que haya buenos operarios y mejores funcionarios."},{"red":"FB","usuario":"Jobernar Morasc","comentario":"Yo quiero trabajar soy supervisor"},{"red":"FB","usuario":"Wilman Gutierrez","comentario":"Yo quiero trabajar con ustedes"},{"red":"FB","usuario":"Juan David Bonilla","comentario":"Han tapado huecos mientras hacen las obras. Bien ah Instituto Nacional de Vías - Invías esto es lo que tienen que hacer en la vía Bogotá Faca los Alpes, ellos si limpian las benditas señales."},{"red":"FB","usuario":"Salomé Sofia Romero Delgado","comentario":"Arriba el género acá le hacemos con moral también por que nuestro género se habrá camino en estas profesiones dominadas por mucho tiempo por el género masculino."},{"red":"FB","usuario":"Hector Arnulfo Camberos Palacio","comentario":"Buenos días soy operador de vibrocompactador y estoy certificado con licencia C2."},{"red":"FB","usuario":"Ar Isa","comentario":"No se les olvide los huevos de las aves que los ponen en el piso 🙏🏻"},{"red":"IG","usuario":"Andreww Salazar","comentario":"Como podría contactarlos y generar una campaña de seguridad vial para los niños.. podríamos hacerlo??"},{"red":"IG","usuario":"Christian Rozo","comentario":"Empiecen pronto por favor. Más acciones, no vayan a salir que faltan estudios de detalle."},{"red":"IG","usuario":"Adrimont","comentario":"Por favor link para conexión virtual. Los interesados y afectados somos muchos"},{"red":"IG","usuario":"Diego Rodriguez","comentario":"Tienen vacantes de mano de obra calificada, hay algún link para ver las vacantes?"},{"red":"IG","usuario":"Vargas Rubiela","comentario":"Esperamos poder asistir a esa reunión así sea virtual para seguir los avances de los proyectos"},{"red":"IG","usuario":"Edwin","comentario":"Buenas tardes, se pueden llevar hojas de vida?"},{"red":"IG","usuario":"dianamarcela4202","comentario":"Salario??"},{"red":"IG","usuario":"denidel_sanchez","comentario":"Auxiliares de ingeniería no necesitan?"},{"red":"IG","usuario":"ivan.andres45","comentario":"Esperamos 0 corrupción y mucha organización del proyecto!"},{"red":"IG","usuario":"Nancy Perez Naranjo","comentario":"Excelente, pero terrible! Sobre todo con la cantidad de Colegios que hay en el norte, y los trancones tan tremendos que hay! Ojalá que los planes de agilidad sean buenos!"},{"red":"IG","usuario":"mparada078","comentario":"Será que están preparados para hacer la obra? Tanto esperar para seguir aplazando. Qué barbaridad!!!"},{"red":"IG","usuario":"nan","comentario":"Hola buenas tardes saben dónde puedo llevar hoja de vida para ampliación autopista norte"},{"red":"IG","usuario":"Fernando.sanchezp","comentario":"Felicitaciones! Se necesita con Urgencia esta vía. Adelante! @rutabogotanorte @ani_colombia 🤗👍"},{"red":"IG","usuario":"Marthaju07","comentario":"Enhorabuena... felicitaciones!! El inicio de una obra que conecta regiones y necesaria para el desarrollo vial de nuestra ciudad BOGOTÁ."},{"red":"IG","usuario":"npinillag","comentario":"Felicitaciones por el logro, más que justo"}]};
+
+/* ════════════════════════════════════
+   ESTADO Y UTILIDADES
+════════════════════════════════════ */
+const MES_LABELS = {'2026-04':'Abril 2026','2026-05':'Mayo 2026','2026-06':'Junio 2026','2026-07':'Julio 2026'};
+const MES_ORDER  = ['2026-04','2026-05','2026-06','2026-07'];
+const COL_AZUL   = '#1c345c';
+const COL_VERDE  = '#6cb42c';
+const COL_LI     = '#0a66c2';
+const COL_FB     = '#1877f2';
+
+let liChart=null, fbChart=null, fbChartTipo=null, fbChartTop=null, menChart=null;
+
+function fmt(n){ return n>=1000?(n/1000).toFixed(1).replace('.',',')+' k':n.toString(); }
+function pct(a,b){ return b===0?'0%':(a/b*100).toFixed(1).replace('.',',')+'%'; }
+function deltaBadge(cur,prev,label='vs. mes anterior'){
+  if(!prev||prev===0) return '';
+  const d=((cur-prev)/prev*100);
+  const cls=d>0?'up':d<0?'down':'same';
+  const arrow=d>0?'↑':d<0?'↓':'→';
+  return `<span class="delta-badge ${cls}">${arrow} ${d>=0?'+':''}${d.toFixed(1).replace('.',',')}% ${label}</span>`;
+}
+
+function showModule(id, btn){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('visible'));
+  document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('mod-'+id).classList.add('visible');
+  btn.classList.add('active');
+}
+
+/* ════════════════════════════════════
+   LINKEDIN
+════════════════════════════════════ */
+function renderLI(){
+  const mes = document.getElementById('liMesSelect').value;
+  const ind  = DATA.li_indicadores[mes];
+  const posts= DATA.li_posts[mes]||[];
+  const prevMes = MES_ORDER[MES_ORDER.indexOf(mes)-1];
+  const prev = prevMes ? DATA.li_indicadores[prevMes] : null;
+
+  // Hero
+  document.getElementById('liHeroMes').textContent    = MES_LABELS[mes];
+  document.getElementById('liHeroImp').textContent    = fmt(ind.impresiones);
+  document.getElementById('liHeroCli').textContent    = fmt(ind.clics);
+  document.getElementById('liHeroPosts').textContent  = posts.length;
+  document.getElementById('liHeroTasa').textContent   = (ind.tasa_interaccion*100).toFixed(1).replace('.',',')+' %';
+
+  // KPIs
+  document.getElementById('liKpiImp').textContent     = fmt(ind.impresiones);
+  document.getElementById('liKpiCli').textContent     = fmt(ind.clics);
+  document.getElementById('liKpiCliSub').textContent  = 'tasa clics: '+pct(ind.clics,ind.impresiones);
+  document.getElementById('liKpiRea').textContent     = fmt(ind.reacciones);
+  document.getElementById('liKpiReaSub').textContent  = 'tasa reac.: '+pct(ind.reacciones,ind.impresiones);
+  document.getElementById('liKpiCom').textContent     = fmt(ind.comentarios);
+  document.getElementById('liKpiTasa').textContent    = (ind.tasa_interaccion*100).toFixed(1).replace('.',',')+' %';
+  document.getElementById('liKpiImpDelta').innerHTML  = prev ? deltaBadge(ind.impresiones, prev.impresiones) : '';
+
+  renderLIChart();
+  renderLIComparativa();
+  renderLITabla(posts);
+}
+
+function renderLIChart(){
+  const mes     = document.getElementById('liMesSelect').value;
+  const metrica = document.getElementById('liMetricaSelect').value;
+  const dias    = DATA.li_indicadores[mes].dias;
+  const labels  = dias.map(d=>d.d);
+  const valores = dias.map(d=>d[metrica]);
+  const metLabels= {imp:'Impresiones',cli:'Clics',rea:'Reacciones'};
+  document.getElementById('liChartTitulo').textContent = 'Tendencia diaria · '+metLabels[metrica];
+
+  if(liChart){ liChart.destroy(); }
+  liChart = new Chart(document.getElementById('liChartTendencia').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label:metLabels[metrica],
+        data:valores,
+        backgroundColor:'rgba(28,52,92,0.75)',
+        borderColor:COL_AZUL,
+        borderWidth:0,
+        borderRadius:4,
+        hoverBackgroundColor:COL_VERDE
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'white',borderColor:'#e0e0e0',borderWidth:1,titleColor:COL_AZUL,bodyColor:'#555',padding:10}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'Inter',size:10},color:'#999'}},
+        y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:11},color:'#999'},beginAtZero:true}
+      }
+    }
+  });
+}
+
+function renderLIComparativa(){
+  const mes = document.getElementById('liMesSelect').value;
+  const mesToShow = MES_ORDER.filter(m => DATA.li_indicadores[m]);
+  const maxImp = Math.max(...mesToShow.map(m=>DATA.li_indicadores[m].impresiones));
+
+  document.getElementById('liCompGrid').innerHTML = mesToShow.map(m=>{
+    const d   = DATA.li_indicadores[m];
+    const posts=(DATA.li_posts[m]||[]).length;
+    const isAct= m===mes;
+    const bp_imp= Math.round(d.impresiones/maxImp*100);
+    const bp_cli= Math.round(d.clics/maxImp*100);
+    const bp_rea= Math.round(d.reacciones/maxImp*100);
+    return `<div class="comp-mes${isAct?' activo':''}">
+      <div class="comp-mes-label">${MES_LABELS[m]}${isAct?' · activo':''}</div>
+      <div class="comp-mes-principal">${fmt(d.impresiones)}</div>
+      <div class="comp-mes-sub">${posts} publicaciones · tasa ${(d.tasa_interaccion*100).toFixed(1).replace('.',',')}%</div>
+      <div class="comp-bars">
+        <div class="comp-bar-row"><div class="comp-bar-label">Impresiones</div><div class="comp-bar-track"><div class="comp-bar-fill" style="width:${bp_imp}%;background:${COL_AZUL}"></div></div><div class="comp-bar-val">${fmt(d.impresiones)}</div></div>
+        <div class="comp-bar-row"><div class="comp-bar-label">Clics</div><div class="comp-bar-track"><div class="comp-bar-fill" style="width:${bp_cli}%;background:${COL_VERDE}"></div></div><div class="comp-bar-val">${fmt(d.clics)}</div></div>
+        <div class="comp-bar-row"><div class="comp-bar-label">Reacciones</div><div class="comp-bar-track"><div class="comp-bar-fill" style="width:${bp_rea}%;background:${COL_LI}"></div></div><div class="comp-bar-val">${fmt(d.reacciones)}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLITabla(posts){
+  const sorted=[...posts].sort((a,b)=>b.imp-a.imp);
+  document.getElementById('liTablaBody').innerHTML = sorted.map(p=>{
+    const tipoCls = p.tipo.toLowerCase().includes('vídeo')||p.tipo.toLowerCase().includes('video')?'tipo-video':'tipo-org';
+    return `<tr>
+      <td class="fecha-cell">${p.fecha}</td>
+      <td><span class="tipo-tag ${tipoCls}">${p.tipo}</span></td>
+      <td class="titulo-cell"><a class="post-link" href="${p.enlace}" target="_blank" title="${p.titulo}">${p.titulo}</a></td>
+      <td class="num-cell hi">${fmt(p.imp)}</td>
+      <td class="num-cell">${fmt(p.cli)}</td>
+      <td class="num-cell">${fmt(p.rea)}</td>
+      <td class="num-cell">${p.com}</td>
+      <td class="num-cell">${(p.tasa*100).toFixed(1).replace('.',',')}%</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════
+   FACEBOOK
+════════════════════════════════════ */
+function renderFB(){
+  const mes  = document.getElementById('fbMesSelect').value;
+  const d    = DATA.fb[mes];
+  const prevMes = MES_ORDER[MES_ORDER.indexOf(mes)-1];
+  const prev = prevMes ? DATA.fb[prevMes] : null;
+
+  document.getElementById('fbHeroMes').textContent   = MES_LABELS[mes];
+  document.getElementById('fbHeroAlc').textContent   = fmt(d.alcance);
+  document.getElementById('fbHeroViz').textContent   = fmt(d.visualizaciones);
+  document.getElementById('fbHeroPosts').textContent = d.posts_count;
+  document.getElementById('fbHeroRea').textContent   = fmt(d.reacciones);
+
+  document.getElementById('fbKpiAlc').textContent    = fmt(d.alcance);
+  document.getElementById('fbKpiViz').textContent    = fmt(d.visualizaciones);
+  document.getElementById('fbKpiVizSub').textContent = 'total visualizaciones';
+  document.getElementById('fbKpiRea').textContent    = fmt(d.reacciones);
+  document.getElementById('fbKpiReaSub').textContent = pct(d.reacciones,d.alcance)+' del alcance';
+  document.getElementById('fbKpiCom').textContent    = fmt(d.comentarios);
+  document.getElementById('fbKpiSha').textContent    = fmt(d.compartidos);
+  document.getElementById('fbKpiAlcDelta').innerHTML = prev ? deltaBadge(d.alcance, prev.alcance) : '';
+
+  renderFBChart();
+  renderFBChartTipo(d.posts);
+  renderFBChartTop(d.posts);
+  renderFBComparativa();
+  renderFBTabla(d.posts);
+}
+
+function renderFBChart(){
+  const mes     = document.getElementById('fbMesSelect').value;
+  const metrica = document.getElementById('fbMetricaSelect').value;
+  const posts   = DATA.fb[mes].posts;
+  const sorted  = [...posts].sort((a,b)=>{
+    const fechaA=parseInt(a.fecha.split('/')[0]);
+    const fechaB=parseInt(b.fecha.split('/')[0]);
+    return fechaA-fechaB;
+  });
+  const labels  = sorted.map(p=>p.fecha);
+  const valores = sorted.map(p=>p[metrica]);
+  const metLabels={alc:'Alcance',imp:'Visualizaciones',rea:'Reacciones'};
+  document.getElementById('fbChartTitulo').textContent='Tendencia por publicación · '+metLabels[metrica];
+
+  if(fbChart){ fbChart.destroy(); }
+  fbChart=new Chart(document.getElementById('fbChartTendencia').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label:metLabels[metrica],
+        data:valores,
+        backgroundColor:'rgba(24,119,242,0.7)',
+        borderColor:COL_FB,
+        borderWidth:0,
+        borderRadius:4,
+        hoverBackgroundColor:COL_VERDE
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'white',borderColor:'#e0e0e0',borderWidth:1,titleColor:COL_FB,bodyColor:'#555',padding:10,callbacks:{title:ctx=>{const p=sorted[ctx[0].dataIndex];return p.titulo.substring(0,60)+'…';}}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'Inter',size:9},color:'#999',maxRotation:45}},
+        y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:11},color:'#999'},beginAtZero:true}
+      }
+    }
+  });
+}
+
+function renderFBChartTipo(posts){
+  const cnt={'Videos':0,'Fotos':0};
+  posts.forEach(p=>{ cnt[p.tipo]=(cnt[p.tipo]||0)+1; });
+  const labels=Object.keys(cnt).map(k=>`${k} ${cnt[k]}`);
+  const vals=Object.values(cnt);
+  if(fbChartTipo){ fbChartTipo.destroy(); }
+  fbChartTipo=new Chart(document.getElementById('fbChartTipo').getContext('2d'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:[COL_FB,'#6cb42c'],borderWidth:3,borderColor:'white'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'white',borderColor:'#e0e0e0',borderWidth:1,bodyColor:'#555',callbacks:{label:ctx=>ctx.label}}}}
+  });
+  document.getElementById('fbLegendTipo').innerHTML=labels.map((l,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${[COL_FB,COL_VERDE][i]}"></div>${l}</div>`).join('');
+}
+
+function renderFBChartTop(posts){
+  const top=[...posts].sort((a,b)=>b.alc-a.alc).slice(0,5);
+  const labels=top.map(p=>p.titulo.substring(0,35)+'…');
+  const vals=top.map(p=>p.alc);
+  if(fbChartTop){ fbChartTop.destroy(); }
+  fbChartTop=new Chart(document.getElementById('fbChartTop').getContext('2d'),{
+    type:'bar',
+    data:{labels,datasets:[{data:vals,backgroundColor:['rgba(28,52,92,0.85)','rgba(28,52,92,0.7)','rgba(28,52,92,0.55)','rgba(28,52,92,0.4)','rgba(28,52,92,0.28)'],borderWidth:0,borderRadius:4}]},
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'white',borderColor:'#e0e0e0',borderWidth:1,bodyColor:'#555',callbacks:{title:ctx=>{return top[ctx[0].dataIndex].titulo.substring(0,60)+'…';},label:ctx=>`Alcance: ${fmt(ctx.raw)}`}}},
+      scales:{x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:10},color:'#999'},beginAtZero:true},y:{grid:{display:false},ticks:{font:{family:'Inter',size:10},color:'#555'}}}
+    }
+  });
+}
+
+function renderFBComparativa(){
+  const mes=document.getElementById('fbMesSelect').value;
+  const mesToShow=MES_ORDER.filter(m=>DATA.fb[m]);
+  const maxAlc=Math.max(...mesToShow.map(m=>DATA.fb[m].alcance));
+  document.getElementById('fbCompGrid').innerHTML=mesToShow.map(m=>{
+    const d=DATA.fb[m];
+    const isAct=m===mes;
+    const bp_alc=Math.round(d.alcance/maxAlc*100);
+    const bp_rea=Math.round(d.reacciones/maxAlc*100);
+    const bp_sha=Math.round(d.compartidos/maxAlc*100);
+    return `<div class="comp-mes${isAct?' activo':''}">
+      <div class="comp-mes-label">${MES_LABELS[m]}${isAct?' · activo':''}</div>
+      <div class="comp-mes-principal">${fmt(d.alcance)}</div>
+      <div class="comp-mes-sub">${d.posts_count} publicaciones · ${fmt(d.reacciones)} reacciones</div>
+      <div class="comp-bars">
+        <div class="comp-bar-row"><div class="comp-bar-label">Alcance</div><div class="comp-bar-track"><div class="comp-bar-fill" style="width:${bp_alc}%;background:${COL_FB}"></div></div><div class="comp-bar-val">${fmt(d.alcance)}</div></div>
+        <div class="comp-bar-row"><div class="comp-bar-label">Reacciones</div><div class="comp-bar-track"><div class="comp-bar-fill" style="width:${bp_rea}%;background:${COL_VERDE}"></div></div><div class="comp-bar-val">${fmt(d.reacciones)}</div></div>
+        <div class="comp-bar-row"><div class="comp-bar-label">Compartidos</div><div class="comp-bar-track"><div class="comp-bar-fill" style="width:${bp_sha}%;background:${COL_AZUL}"></div></div><div class="comp-bar-val">${d.compartidos}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFBTabla(posts){
+  const sorted=[...posts].sort((a,b)=>b.alc-a.alc);
+  document.getElementById('fbTablaBody').innerHTML=sorted.map(p=>{
+    const tipoCls=p.tipo==='Videos'?'tipo-video':'tipo-foto';
+    return `<tr>
+      <td class="fecha-cell">${p.fecha}</td>
+      <td><span class="tipo-tag ${tipoCls}">${p.tipo}</span></td>
+      <td class="titulo-cell"><a class="post-link" href="${p.enlace}" target="_blank" title="${p.titulo}">${p.titulo}</a></td>
+      <td class="num-cell">${fmt(p.viz)}</td>
+      <td class="num-cell hi">${fmt(p.alc)}</td>
+      <td class="num-cell">${fmt(p.rea)}</td>
+      <td class="num-cell">${p.com}</td>
+      <td class="num-cell">${p.sha}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════
+   MENCIONES
+════════════════════════════════════ */
+function renderMenciones(){
+  // Donut por red
+  const cnt={IG:15,FB:7,X:1};
+  const colors=['#e1306c',COL_FB,'#111'];
+  menChart=new Chart(document.getElementById('menChartRed').getContext('2d'),{
+    type:'doughnut',
+    data:{
+      labels:[`Instagram 15`,`Facebook 7`,`X / Twitter 1`],
+      datasets:[{data:Object.values(cnt),backgroundColor:colors,borderWidth:3,borderColor:'white'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'white',borderColor:'#e0e0e0',borderWidth:1,bodyColor:'#555'}}}
+  });
+  document.getElementById('menLegendRed').innerHTML=[`Instagram 15`,`Facebook 7`,`X / Twitter 1`].map((l,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${colors[i]}"></div>${l}</div>`).join('');
+
+  // Lista
+  const redClass={IG:'ig',FB:'fb',X:'x'};
+  const redLabel={IG:'Instagram',FB:'Facebook',X:'X / Twitter'};
+  document.getElementById('menLista').innerHTML=DATA.menciones.map(m=>{
+    const r=m.red.trim();
+    const cls=redClass[r]||'fb';
+    return `<div class="men-card ${cls}">
+      <div class="men-meta">
+        <span class="men-red-badge ${cls}">${redLabel[r]||r}</span>
+        <span class="men-usuario">@${m.usuario.replace('@','')}</span>
+      </div>
+      <div class="men-texto">${m.comentario}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
+document.getElementById('footerFecha').textContent=new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
+window.addEventListener('DOMContentLoaded',()=>{
+  renderLI();
+  renderFB();
+  renderMenciones();
+});
+</script>
+
+<!-- ══════════════════════════════════
+     MÓDULO 4 · RECOMENDACIONES
+══════════════════════════════════ -->
+<div class="module" id="mod-rec">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">Estrategia digital · Análisis consolidado</div>
+      <div class="hero-titulo">Recomendaciones <em>estratégicas</em></div>
+      <div class="hero-sub">Diagnóstico y plan de acción · Período abril – julio 2026</div>
+      <div class="hero-kpis">
+        <div class="hero-kpi"><div class="hero-kpi-label">Acciones prioritarias</div><div class="hero-kpi-valor">7</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Ideas de contenido</div><div class="hero-kpi-valor">6</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Alerta reputacional</div><div class="hero-kpi-valor">Riesgo medio</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Sentimiento general</div><div class="hero-kpi-valor">43% negativo</div></div>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+
+    <!-- ACORDEÓN: ALERTA REPUTACIONAL -->
+    <div class="acord-wrap">
+      <button class="acord-btn" onclick="toggleAcord(this)">
+        <div class="acord-btn-left">
+          <div class="acord-icon-wrap">⚠️</div>
+          <div>
+            <div class="acord-label">Alerta reputacional · Riesgo medio</div>
+            <div class="acord-sublabel">Monitoreo activo recomendado — inicio de obras y vacantes</div>
+          </div>
+        </div>
+        <svg class="acord-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="acord-body">
+        <div class="alerta-card" style="margin-bottom:0;margin-top:0;border-radius:10px;">
+          <div class="alerta-icon">⚠️</div>
+          <div>
+            <div class="alerta-titulo">Alerta reputacional activa · Riesgo medio</div>
+            <div class="alerta-texto">Crece el escepticismo sobre el inicio visible de las obras. El mensaje <em>"ya firmaron el acta pero no se ve nada"</em> está presente en X, Instagram y Facebook. Si este volumen aumenta sin una respuesta oficial proactiva, puede convertirse en un foco de deterioro reputacional que opaque los logros del proyecto. Se recomienda monitoreo semanal de las categorías <strong>inicio de obras</strong> y <strong>vacantes laborales</strong>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAGNÓSTICO GENERAL (siempre visible) -->
+    <div class="comp-card">
+      <div class="rec-section-label">Diagnóstico general de la estrategia digital</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="background:var(--verde-bg);border-radius:10px;padding:20px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#3a6418;margin-bottom:12px;">✓ Fortalezas identificadas</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:9px;">
+            <li style="font-size:12px;color:#2d4a16;line-height:1.55;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:var(--verde);">·</span><strong>Identidad gráfica consolidada</strong> — consistente en todas las plataformas, transmite profesionalismo y reconocimiento de marca.</li>
+            <li style="font-size:12px;color:#2d4a16;line-height:1.55;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:var(--verde);">·</span><strong>Diversidad temática real</strong> — avances constructivos, gestión social, cultura vial, medio ambiente, empleabilidad y comunidad. Pocas concesionarias tienen tanto material.</li>
+            <li style="font-size:12px;color:#2d4a16;line-height:1.55;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:var(--verde);">·</span><strong>Frecuencia sostenida</strong> — la presencia digital es constante y cubre los períodos clave del proyecto.</li>
+            <li style="font-size:12px;color:#2d4a16;line-height:1.55;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:var(--verde);">·</span><strong>LinkedIn como canal de reputación</strong> — es, por margen amplio, la red más eficiente. Las publicaciones técnicas e institucionales alcanzan tasas de interacción superiores al 5,7%.</li>
+          </ul>
+        </div>
+        <div style="background:#fff5f5;border-radius:10px;padding:20px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#c42e20;margin-bottom:12px;">✗ Debilidades a corregir</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:9px;">
+            <li style="font-size:12px;color:#7a2020;line-height:1.55;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:#c42e20;">·</span><strong>Enfoque informativo, no emocional</strong> — el contenido responde "¿qué hicimos?" cuando debería responder "¿por qué esto mejora la vida de las personas?"</li>
+            <li style="font-size:12px;color:#7a2020;line-height:1.55;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:#c42e20;">·</span><strong>Baja humanización</strong> — hay muchas actividades comunitarias, pero pocas publicaciones muestran rostros, nombres o historias de personas reales.</li>
+            <li style="font-size:12px;color:#7a2020;line-height:1.55;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:#c42e20;">·</span><strong>Contenido replicado entre plataformas</strong> — cada red tiene su propio lenguaje y algoritmo. Publicar lo mismo en todas reduce el rendimiento de cada canal.</li>
+            <li style="font-size:12px;color:#7a2020;line-height:1.55;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:#c42e20;">·</span><strong>CTAs planos</strong> — los llamados a la acción genéricos ("conócenos", "infórmate") no generan conversación. Los algoritmos premian los comentarios reales.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SENTIMIENTO DE MENCIONES (siempre visible) -->
+    <div class="comp-card">
+      <div class="rec-section-label">Sentimiento general · 23 menciones analizadas</div>
+      <div class="sentimiento-bar">
+        <div class="sent-pos" style="width:22%"></div>
+        <div class="sent-neu" style="width:35%"></div>
+        <div class="sent-neg" style="width:43%"></div>
+      </div>
+      <div class="sentimiento-legend">
+        <div class="sent-item"><div class="sent-dot" style="background:var(--verde)"></div>Positivo — 22%</div>
+        <div class="sent-item"><div class="sent-dot" style="background:#c8d0da"></div>Neutro — 35%</div>
+        <div class="sent-item"><div class="sent-dot" style="background:#c42e20"></div>Negativo — 43%</div>
+      </div>
+      <p style="font-size:12px;color:var(--gris);line-height:1.65;margin-top:14px;">Los comentarios negativos <strong>no corresponden a una crisis reputacional</strong>, sino a expectativas no respondidas sobre el inicio visible de las obras y la falta de información sobre vacantes laborales. La conversación está más orientada a la <em>necesidad de información</em> que a una percepción negativa consolidada — lo que representa una oportunidad concreta para la comunicación proactiva.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:16px;">
+        <div style="background:var(--fondo);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;">Tema #1</div><div style="font-size:12px;font-weight:700;color:var(--negro);">Empleo y vacantes</div><div style="font-size:10px;color:var(--gris);margin-top:2px;">Muy alto interés</div></div>
+        <div style="background:var(--fondo);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;">Tema #2</div><div style="font-size:12px;font-weight:700;color:var(--negro);">Inicio de obras</div><div style="font-size:10px;color:var(--gris);margin-top:2px;">Alto — expectativa e impaciencia</div></div>
+        <div style="background:var(--fondo);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;">Tema #3</div><div style="font-size:12px;font-weight:700;color:var(--negro);">Elogios al proyecto</div><div style="font-size:10px;color:var(--gris);margin-top:2px;">Positivo — incl. #MujeresEnRuta</div></div>
+        <div style="background:var(--fondo);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;">Tema #4</div><div style="font-size:12px;font-weight:700;color:var(--negro);">Movilidad y colegios</div><div style="font-size:10px;color:var(--gris);margin-top:2px;">Preocupación por impacto vial</div></div>
+        <div style="background:var(--fondo);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;">Tema #5</div><div style="font-size:12px;font-weight:700;color:var(--negro);">Participación ciudadana</div><div style="font-size:10px;color:var(--gris);margin-top:2px;">Interés en reuniones y links</div></div>
+      </div>
+    </div>
+
+    <!-- ACORDEÓN: ACCIONES PRIORIZADAS -->
+    <div class="acord-wrap">
+      <button class="acord-btn" onclick="toggleAcord(this)">
+        <div class="acord-btn-left">
+          <div class="acord-icon-wrap">🎯</div>
+          <div>
+            <div class="acord-label">Acciones priorizadas · Plan 90 días</div>
+            <div class="acord-sublabel">7 acciones — 5 de prioridad alta, 1 media, 1 estratégica</div>
+          </div>
+        </div>
+        <svg class="acord-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="acord-body">
+        <div class="rec-grid" style="margin-bottom:0;">
+          <div class="rec-card alta"><div class="rec-card-eyebrow">🔴 Prioridad alta</div><div class="rec-card-titulo">Humanizar el contenido con rostros reales</div><div class="rec-card-texto">Las personas generan conexión; las instituciones generan información. Mostrar colaboradores, operarios, ingenieros y testimonios vecinales rompe la inercia de los algoritmos de forma orgánica. El 30% de las publicaciones debe incluir personas identificadas con nombre y rol.</div><span class="rec-card-red all">Todas las redes</span></div>
+          <div class="rec-card alta"><div class="rec-card-eyebrow">🔴 Prioridad alta</div><div class="rec-card-titulo">Incrementar Reels a 3–4 por semana</div><div class="rec-card-texto">Los videos nativos son el formato con mayor rendimiento en Facebook e Instagram. Maquinaria en movimiento, tomas con dron, transformación del territorio, rescate de fauna y "detrás de cámaras" tienen alto potencial de viralización. Los algoritmos actuales priorizan contenido que retiene por más tiempo.</div><span class="rec-card-red ig">Instagram / Facebook</span></div>
+          <div class="rec-card alta"><div class="rec-card-eyebrow">🔴 Prioridad alta</div><div class="rec-card-titulo">Crear series recurrentes de contenido</div><div class="rec-card-texto">Las personas siguen series, no publicaciones aisladas. Propuestas concretas: <strong>«Así construimos»</strong> (infraestructura), <strong>«Un día con…»</strong> (personas), <strong>«Guardianes del Ambiente»</strong> (biodiversidad), <strong>«60 segundos en la Ruta»</strong> (formato firma). Una identidad visual fija por serie genera fidelización y recordación.</div><span class="rec-card-red all">Todas las redes</span></div>
+          <div class="rec-card alta"><div class="rec-card-eyebrow">🔴 Prioridad alta</div><div class="rec-card-titulo">Reducir contenido puramente corporativo en LinkedIn</div><div class="rec-card-texto">Los recordatorios genéricos de Pico y Placa caen al 1,3% de interacción en LinkedIn vs. más del 5,7% de publicaciones técnicas. Limitar este tipo de contenido y reemplazarlo por reportes de avance de obra en video con voceros técnicos identificados. Si se usa Pico y Placa, enmarcar como "Pico y Placa Regional" con rutas alternativas.</div><span class="rec-card-red li">LinkedIn</span></div>
+          <div class="rec-card alta"><div class="rec-card-eyebrow">🔴 Prioridad alta</div><div class="rec-card-titulo">Adaptar el contenido a cada plataforma</div><div class="rec-card-texto">Replicar el mismo post en todas las redes penaliza el rendimiento. LinkedIn requiere rigor técnico; Facebook, historias comunitarias y álbumes; Instagram, Reels (70% del contenido) y carruseles educativos; X, información vial inmediata y alertas en tiempo real.</div><span class="rec-card-red all">Estrategia general</span></div>
+          <div class="rec-card media"><div class="rec-card-eyebrow">🟡 Prioridad media</div><div class="rec-card-titulo">Pedagogía ambiental como diferenciador</div><div class="rec-card-texto">El proyecto Accesos Norte II convive con los humedales Torca y Guaymaral. La audiencia tiene sensibilidad ambiental activa. Dinámicas de «Mito vs. Realidad» sobre el proyecto, pasos de fauna, traslado de árboles y monitoreo de biodiversidad son contenidos únicos que ninguna otra concesionaria está produciendo.</div><span class="rec-card-red fb">Facebook / Instagram</span></div>
+          <div class="rec-card estrat"><div class="rec-card-eyebrow">🔵 Acción estratégica</div><div class="rec-card-titulo">Consolidar tres pilares editoriales</div><div class="rec-card-texto">Toda la estrategia debe orbitar alrededor de tres ejes: <strong>Infraestructura</strong> (obra, ingeniería, avances), <strong>Personas</strong> (comunidad, colaboradores, historias) y <strong>Sostenibilidad</strong> (medio ambiente, fauna, biodiversidad). Estos tres pilares diferencian a Ruta Bogotá Norte de cualquier otra concesionaria del país.</div><span class="rec-card-red all">Calendario editorial</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACORDEÓN: KPIs -->
+    <div class="acord-wrap">
+      <button class="acord-btn" onclick="toggleAcord(this)">
+        <div class="acord-btn-left">
+          <div class="acord-icon-wrap">📊</div>
+          <div>
+            <div class="acord-label">Indicadores clave recomendados (KPIs)</div>
+            <div class="acord-sublabel">8 métricas de calidad más allá del alcance e impresiones</div>
+          </div>
+        </div>
+        <svg class="acord-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="acord-body">
+        <p style="font-size:12px;color:var(--gris);line-height:1.6;margin-bottom:16px;">Además del alcance e impresiones ya monitoreados, estos indicadores reflejan mejor la calidad de la interacción y el impacto real del contenido:</p>
+        <div class="kpi-rec-grid" style="margin-bottom:0;">
+          <div class="kpi-rec-card"><div class="kpi-rec-nombre">Tasa de engagement</div><div class="kpi-rec-obj">Medir la interacción real vs. solo el alcance</div></div>
+          <div class="kpi-rec-card"><div class="kpi-rec-nombre">% de visualización completa</div><div class="kpi-rec-obj">Identificar qué videos retienen hasta el final</div></div>
+          <div class="kpi-rec-card"><div class="kpi-rec-nombre">Tiempo promedio de reproducción</div><div class="kpi-rec-obj">Evaluar retención en Reels y videos cortos</div></div>
+          <div class="kpi-rec-card"><div class="kpi-rec-nombre">Contenido guardado</div><div class="kpi-rec-obj">Detectar piezas de valor utilitario real</div></div>
+          <div class="kpi-rec-card"><div class="kpi-rec-nombre">Comentarios cualificados</div><div class="kpi-rec-obj">Medir conversación vs. reacciones pasivas</div></div>
+          <div class="kpi-rec-card"><div class="kpi-rec-nombre">Crecimiento de seguidores</div><div class="kpi-rec-obj">Evaluar atracción de nuevas audiencias mes a mes</div></div>
+          <div class="kpi-rec-card"><div class="kpi-rec-nombre">Clics al perfil</div><div class="kpi-rec-obj">Medir interés por la marca más allá del post</div></div>
+          <div class="kpi-rec-card"><div class="kpi-rec-nombre">Alcance orgánico</div><div class="kpi-rec-obj">Analizar desempeño sin pauta ni boost pagado</div></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /mod-rec -->
+
+<!-- ══════════════════════════════════
+     MÓDULO 5 · PLAN DE CONTENIDO
+══════════════════════════════════ -->
+<div class="module" id="mod-plan">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">Ejecución editorial · Agosto 2026</div>
+      <div class="hero-titulo">Plan de <em>contenido</em></div>
+      <div class="hero-sub">Horarios óptimos, ideas accionables y calendario mensual</div>
+      <div class="hero-kpis">
+        <div class="hero-kpi"><div class="hero-kpi-label">Ideas de contenido</div><div class="hero-kpi-valor">6</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Publicaciones agosto</div><div class="hero-kpi-valor">16</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Pilares editoriales</div><div class="hero-kpi-valor">3</div></div>
+        <div class="hero-kpi"><div class="hero-kpi-label">Plataformas cubiertas</div><div class="hero-kpi-valor">FB · IG · LI · X</div></div>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+
+    <!-- HORARIOS (siempre visible) -->
+    <div class="comp-card">
+      <div class="rec-section-label">Horarios óptimos de publicación</div>
+      <div class="horarios-grid">
+        <div class="horario-card">
+          <div class="horario-red"><div class="horario-red-dot" style="background:var(--li-color)"></div><div class="horario-red-label">LinkedIn</div></div>
+          <div class="horario-slot"><div class="horario-hora">Mar – Jue · 11:30–1:30 pm</div><div class="horario-obj">Hitos corporativos, avances de obra, comunicados técnicos</div></div>
+          <div class="horario-slot"><div class="horario-hora">Mar – Jue · 7:30–9:00 am</div><div class="horario-obj">Contenido de autoridad y posicionamiento institucional</div></div>
+        </div>
+        <div class="horario-card">
+          <div class="horario-red"><div class="horario-red-dot" style="background:var(--fb-color)"></div><div class="horario-red-label">Facebook</div></div>
+          <div class="horario-slot"><div class="horario-hora">Lun – Mié · 7:00–8:30 am</div><div class="horario-obj">Usuarios planeando su movilidad diaria</div></div>
+          <div class="horario-slot"><div class="horario-hora">Vie · 5:00–6:30 pm</div><div class="horario-obj">Contenido comunitario e histórico</div></div>
+          <div class="horario-slot"><div class="horario-hora">Diario · 6:00–8:00 pm</div><div class="horario-obj">Mayor interacción orgánica general</div></div>
+        </div>
+        <div class="horario-card">
+          <div class="horario-red"><div class="horario-red-dot" style="background:#e1306c"></div><div class="horario-red-label">Instagram</div></div>
+          <div class="horario-slot"><div class="horario-hora">Diario · 8:00–9:00 am</div><div class="horario-obj">Reels — mayor tracción en las primeras horas</div></div>
+          <div class="horario-slot"><div class="horario-hora">Diario · 12:00–1:00 pm</div><div class="horario-obj">Carruseles educativos y contenido de valor</div></div>
+          <div class="horario-slot"><div class="horario-hora">Diario · 7:00–9:00 pm</div><div class="horario-obj">Mayor engagement general</div></div>
+        </div>
+        <div class="horario-card">
+          <div class="horario-red"><div class="horario-red-dot" style="background:#111"></div><div class="horario-red-label">X (Twitter)</div></div>
+          <div class="horario-slot"><div class="horario-hora">7:00 am / 12:00 m / 5:00 pm</div><div class="horario-obj">Alertas viales, estado del corredor, información inmediata</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACORDEÓN: IDEAS DE CONTENIDO -->
+    <div class="acord-wrap">
+      <button class="acord-btn" onclick="toggleAcord(this)">
+        <div class="acord-btn-left">
+          <div class="acord-icon-wrap">💡</div>
+          <div>
+            <div class="acord-label">Ideas de contenido prioritarias</div>
+            <div class="acord-sublabel">6 ideas basadas en la conversación real de la comunidad</div>
+          </div>
+        </div>
+        <svg class="acord-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="acord-body">
+        <div class="ideas-list" style="margin-bottom:0;">
+          <div class="idea-card"><div class="idea-num">01</div><div><div class="idea-titulo">«Ruta al Empleo» — infografía o video corto</div><div class="idea-texto">Canalizar el altísimo volumen de solicitudes de empleo que llega por comentarios. Explicar el canal oficial para postular, qué perfiles se buscan y cómo funciona el proceso. Reducirá la saturación de comentarios de vacantes y demuestra escucha activa.</div><div class="idea-tags"><span class="idea-tag">Alta urgencia</span><span class="idea-tag">FB + IG</span><span class="idea-tag">Reel + Carrusel</span></div></div></div>
+          <div class="idea-card"><div class="idea-num">02</div><div><div class="idea-titulo">«Detrás del Cronograma: ¿Qué pasa antes de la maquinaria?»</div><div class="idea-texto">Calmar la impaciencia ciudadana por la "falta de movimiento" visible. Mostrar las fases previas al ingreso de maquinaria: estudios de detalle, campamentos, gestión predial. Mensaje clave: "no ver excavadoras no significa que el proyecto esté quieto."</div><div class="idea-tags"><span class="idea-tag">Alta urgencia</span><span class="idea-tag">Todas las redes</span><span class="idea-tag">Reel vertical / TikTok</span></div></div></div>
+          <div class="idea-card"><div class="idea-num">03</div><div><div class="idea-titulo">«Plan de Movilidad Escolar» — carrusel o comunicado</div><div class="idea-texto">Mitigar el temor de padres y colegios del norte ante el impacto de las obras. Presentar los planes de agilidad vial, coordinación con instituciones educativas y horarios de menor impacto.</div><div class="idea-tags"><span class="idea-tag">Prioridad media</span><span class="idea-tag">FB</span><span class="idea-tag">Carrusel + Comunicado</span></div></div></div>
+          <div class="idea-card"><div class="idea-num">04</div><div><div class="idea-titulo">«Guardianes del Ambiente» — serie semanal</div><div class="idea-texto">Rescate de fauna, pasos de fauna, traslado de árboles, monitoreo de humedales Torca y Guaymaral. Contenido único entre concesionarias colombianas con alto potencial de viralización. Formato mini-documental, un episodio por semana.</div><div class="idea-tags"><span class="idea-tag">Diferenciador</span><span class="idea-tag">IG + FB</span><span class="idea-tag">Reel 60–90 seg.</span></div></div></div>
+          <div class="idea-card"><div class="idea-num">05</div><div><div class="idea-titulo">«60 segundos en la Ruta» — serie firma</div><div class="idea-texto">Serie semanal con identidad visual fija: un operador explica su trabajo, un ingeniero muestra un avance, una bióloga presenta una especie, un comerciante cuenta cómo cambió su entorno. El formato más replicable para consolidar a Ruta Bogotá Norte como referente nacional.</div><div class="idea-tags"><span class="idea-tag">Estratégico</span><span class="idea-tag">Todas las redes</span><span class="idea-tag">Reel / TikTok / LI</span></div></div></div>
+          <div class="idea-card"><div class="idea-num">06</div><div><div class="idea-titulo">«Mito vs. Realidad» — pedagogía ambiental</div><div class="idea-texto">Responder los miedos de la audiencia sobre el impacto ambiental. Ejemplos: "¿La obra destruirá los humedales Torca y Guaymaral?" / "¿Qué pasa con los animales del corredor?". Ataca el escepticismo de raíz y posiciona a la concesionaria como líder en infraestructura sostenible.</div><div class="idea-tags"><span class="idea-tag">Diferenciador</span><span class="idea-tag">LI + IG</span><span class="idea-tag">Carrusel / Video animado</span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDARIO AGOSTO (siempre visible) -->
+    <div class="comp-card">
+      <div class="rec-section-label">Propuesta de calendario · Agosto 2026</div>
+      <div class="calendario-wrap scroll-fino">
+        <table class="calendario-table">
+          <thead>
+            <tr><th>Fecha</th><th>Pilar</th><th>Tema</th><th>Facebook</th><th>Instagram</th><th>LinkedIn / X</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>1 ago</strong></td><td><span class="pilar-tag pilar-vial">Información vial</span></td><td>Estado del corredor</td><td>Publicación con mapa y recomendaciones</td><td>Reel con recorrido de la vía</td><td>Actualización en tiempo real (X)</td></tr>
+            <tr><td><strong>3 ago</strong></td><td><span class="pilar-tag pilar-eng">Engagement</span></td><td>Encuesta: ¿Cuál es el horario más congestionado?</td><td>Encuesta + comentarios</td><td>Sticker de encuesta en Historias</td><td>Encuesta rápida (X)</td></tr>
+            <tr><td><strong>5 ago</strong></td><td><span class="pilar-tag pilar-infra">Infraestructura</span></td><td>Así avanza la obra</td><td>Álbum de fotos</td><td>Reel con dron</td><td>Hilo con avances (LI)</td></tr>
+            <tr><td><strong>7 ago</strong></td><td><span class="pilar-tag pilar-social">Personas</span></td><td>Un día con un operador de maquinaria</td><td>Historia del colaborador</td><td>Reel "Day in the life"</td><td>Post institucional (LI)</td></tr>
+            <tr><td><strong>9 ago</strong></td><td><span class="pilar-tag pilar-vial">Seguridad vial</span></td><td>Consejos para viajar en puente festivo</td><td>Carrusel</td><td>Reel dinámico</td><td>Tips rápidos (X)</td></tr>
+            <tr><td><strong>11 ago</strong></td><td><span class="pilar-tag pilar-amb">Gestión ambiental</span></td><td>Rescate y monitoreo de fauna</td><td>Álbum</td><td>Reel Guardianes del Ambiente</td><td>Dato ambiental (LI)</td></tr>
+            <tr><td><strong>13 ago</strong></td><td><span class="pilar-tag pilar-eng">Engagement</span></td><td>Trivia de la vía</td><td>Pregunta abierta</td><td>Carrusel interactivo</td><td>Trivia (X)</td></tr>
+            <tr><td><strong>15 ago</strong></td><td><span class="pilar-tag pilar-vial">Información vial</span></td><td>Cierres programados</td><td>Infografía</td><td>Historia + Reel</td><td>Actualización inmediata (X)</td></tr>
+            <tr><td><strong>17 ago</strong></td><td><span class="pilar-tag pilar-social">Personas</span></td><td>Historias del corredor</td><td>Testimonio</td><td>Reel emotivo</td><td>Frase destacada (LI)</td></tr>
+            <tr><td><strong>19 ago</strong></td><td><span class="pilar-tag pilar-infra">Infraestructura</span></td><td>¿Cómo se construye un puente?</td><td>Video educativo</td><td>Carrusel educativo</td><td>Ingeniería para todos (LI)</td></tr>
+            <tr><td><strong>21 ago</strong></td><td><span class="pilar-tag pilar-eng">Engagement</span></td><td>¿Qué mejorarías del corredor?</td><td>Publicación participativa</td><td>Caja de preguntas</td><td>Pregunta abierta (X)</td></tr>
+            <tr><td><strong>23 ago</strong></td><td><span class="pilar-tag pilar-social">Gestión social</span></td><td>Jornada con la comunidad</td><td>Álbum</td><td>Reel</td><td>Cobertura en vivo (X)</td></tr>
+            <tr><td><strong>25 ago</strong></td><td><span class="pilar-tag pilar-vial">Información vial</span></td><td>Clima y recomendaciones</td><td>Post</td><td>Historia</td><td>Actualización (X)</td></tr>
+            <tr><td><strong>27 ago</strong></td><td><span class="pilar-tag pilar-bts">Detrás de cámaras</span></td><td>Así planificamos una intervención</td><td>Video BTS</td><td>Reel</td><td>Hilo del equipo técnico (LI)</td></tr>
+            <tr><td><strong>29 ago</strong></td><td><span class="pilar-tag pilar-amb">Gestión ambiental</span></td><td>Guardianes del Ambiente</td><td>Historia</td><td>Mini documental</td><td>Dato curioso (LI)</td></tr>
+            <tr><td><strong>31 ago</strong></td><td><span class="pilar-tag pilar-cierre">Cierre del mes</span></td><td>Lo mejor de agosto</td><td>Resumen</td><td>Reel Highlights</td><td>Hilo resumen (LI)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /mod-plan -->
+
+<script>
+function toggleAcord(btn) {
+  const body = btn.nextElementSibling;
+  const isOpen = btn.classList.contains('open');
+  btn.classList.toggle('open', !isOpen);
+  body.classList.toggle('open', !isOpen);
+}
+</script>
+
+</body>
+</html>
